@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '../store'
 import router from '../router'
 import { Message } from '@arco-design/web-vue'
-import gatewayUrlChoose from '../handler/gatewayUrlChoose'
+import { NeedOuterResponsePrase, gatewayUrlChoose } from '../handler/gatewayUrlChoose'
 
 
 const request = axios.create({
@@ -29,6 +29,11 @@ request.interceptors.request.use(
 request.interceptors.response.use(
     response => {
 
+        // 如果不需要剥离外层的response（统一响应），直接返回
+        if (!NeedOuterResponsePrase()) {
+            return response
+        }
+        // 经过网关，需要剥离外层的response，并判断是否成功
         if (response?.data?.code !== 200) {
             if (response?.data?.message !== null && response?.data?.message !== "") {
                 Message.warning(response?.data?.message)
@@ -39,7 +44,9 @@ request.interceptors.response.use(
                 Message.success(response?.data?.message)
             }
         }
-        return response.data.data
+        return response.data
+
+
     },
     error => {
 

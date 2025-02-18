@@ -1,4 +1,4 @@
-const gatewayUrlChoose = (url) => {
+export const gatewayUrlChoose = (url) => {
     // 根据url选择对应的网关
     let apiSet = JSON.parse(localStorage.getItem('api'));
     if (apiSet.withGateWay) {
@@ -27,4 +27,13 @@ function extractModuleName(url) {
     }
 }
 
-export default gatewayUrlChoose;
+// 如果使用网关，需要剥离外层的response
+export const NeedOuterResponsePrase = (url) => {
+
+    let apiSet = JSON.parse(localStorage.getItem('api'));
+    if (apiSet.withGateWay) {
+        return true;
+    } else {
+        return false;
+    }
+}
