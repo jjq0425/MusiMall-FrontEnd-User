@@ -28,10 +28,10 @@ function extractModuleName(url) {
 }
 
 // 如果使用网关，需要剥离外层的response
-export const NeedOuterResponsePrase = (url) => {
+export const NeedOuterResponsePrase = () => {
 
     let apiSet = JSON.parse(localStorage.getItem('api'));
-    if (apiSet.withGateWay) {
+    if (apiSet.withGateWay || apiSet == null) {
         return true;
     } else {
         return false;

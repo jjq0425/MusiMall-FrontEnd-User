@@ -31,7 +31,7 @@ request.interceptors.response.use(
 
         // 如果不需要剥离外层的response（统一响应），直接返回
         if (!NeedOuterResponsePrase()) {
-            return response
+            return response.data
         }
         // 经过网关，需要剥离外层的response，并判断是否成功
         if (response?.data?.code !== 200) {
@@ -44,7 +44,7 @@ request.interceptors.response.use(
                 Message.success(response?.data?.message)
             }
         }
-        return response.data
+        return response.data.data
 
 
     },
