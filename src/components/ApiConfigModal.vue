@@ -27,7 +27,17 @@
         </a-table>
       </a-form-item>
     </a-form>
-    <div class="version-info">版本号: {{ buildTimestampShow }}</div>
+    <a-alert
+      title="强烈建议使用【网关】环境，非网关环境没有统一响应体，前端可能解析失败！"
+      type="warning"
+      show-icon
+    />
+    <a-alert
+      title="请务必拉取最新的gateway代码，否则若存在多个实例，有可能导致请求负载均衡时走向其他人（非你的机器上运行）的实例，导致请求失败！"
+      type="warning"
+      show-icon
+    />
+    <div class="version-info">前端版本最后更新: {{ buildTimestampShow }}</div>
   </a-modal>
 </template>
 

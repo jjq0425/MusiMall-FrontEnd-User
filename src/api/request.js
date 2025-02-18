@@ -28,11 +28,18 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
     response => {
-        if (response?.data?.code === 500) {
-            Message.warning(response?.data?.message)
+
+        if (response?.data?.code !== 200) {
+            if (response?.data?.message !== null && response?.data?.message !== "") {
+                Message.warning(response?.data?.message)
+            }
             return Promise.reject(response)
+        } else {
+            if (response?.data?.message !== null && response?.data?.message !== "") {
+                Message.success(response?.data?.message)
+            }
         }
-        return response.data
+        return response.data.data
     },
     error => {
 

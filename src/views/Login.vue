@@ -68,9 +68,10 @@
           <a-button type="primary" html-type="submit" long>登录</a-button>
         </a-form-item>
       </a-form>
-      <a-button @click="showApiConfigModal">API 配置</a-button>
+      <!-- <a-button type="text">没有账号？点击注册</a-button> -->
     </div>
     <ApiConfigModal ref="apiConfigModalRef" />
+    <icon-wifi class="wifi-icon" @click="showApiConfigModal" />
   </div>
 </template>
 
@@ -82,13 +83,14 @@ import { getCaptcha, login } from "@/api/auth";
 import { useApiStore } from "@/store/api";
 import { useUserStore } from "@/store/user";
 import { Notification } from "@arco-design/web-vue";
+import { IconWifi } from "@arco-design/web-vue/es/icon";
 
 const apiStore = useApiStore();
 const userStore = useUserStore();
 
 const formData = reactive({
-  username: "",
-  password: "",
+  username: "test",
+  password: "123456",
   captcha: "",
 });
 
@@ -102,26 +104,40 @@ onMounted(() => {
   refreshCaptcha();
 });
 const handleSubmit = () => {
-  // 这里处理登录逻辑，实际项目中需要对接后端API
+  // 校验表单
+  if (!formData.username || !formData.password || !formData.captcha) {
+    Message.error("请填写完整信息");
+    return;
+  }
   login({
     username: formData.username,
     password: formData.password,
     code: formData.captcha,
     uuid: captchaImg.uuid,
   }).then((res) => {
-    Notification.success({
-      title: "登录成功",
-      description: "欢迎回来, " + res.data.username,
-    });
-    userStore.setUserInfo(res.data);
+    console.log(res.token == null);
+    if (res.token == null) {
+      Notification.warning({
+        title: "登录失败",
+        content: res.message,
+      });
+      return;
+    } else {
+      Notification.success({
+        title: "登录成功",
+        content: "欢迎回来, " + res.username,
+      });
+      userStore.setUserInfo(res);
+    }
   });
 };
 
 const refreshCaptcha = () => {
   // 这里处理刷新验证码逻辑，实际项目中需要对接后端API
   getCaptcha().then((res) => {
-    captchaImg.captchaImg = res.data.img;
-    captchaImg.uuid = res.data.uuid;
+    console.log(res);
+    captchaImg.captchaImg = res.img;
+    captchaImg.uuid = res.uuid;
   });
 };
 
@@ -184,7 +200,7 @@ const showApiConfigModal = () => {
 }
 
 :deep(.arco-form-item) {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 :deep(.arco-input-wrapper) {
@@ -206,5 +222,14 @@ const showApiConfigModal = () => {
   top: -100px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.wifi-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
 }
 </style>
