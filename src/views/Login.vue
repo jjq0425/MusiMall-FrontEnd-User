@@ -8,7 +8,7 @@
           class="login-logo"
         />
         <h2>MusiMall</h2>
-        <p>欢迎登录MusiMall</p>
+        <p>欢迎登录MusiMall用户端</p>
       </div>
       <a-form :model="formData" @submit="handleSubmit" layout="vertical">
         <a-form-item
@@ -52,8 +52,15 @@
               </template>
             </a-input>
             <div class="captcha-img" @click="refreshCaptcha">
-              <!-- 这里放验证码图片，实际项目中需要对接后端API -->
-              <a-button>点击刷新验证码</a-button>
+              <a-button type="text" v-if="captchaImg.captchaImg === null"
+                >刷新验证码</a-button
+              >
+              <img
+                v-else
+                :src="captchaImg.captchaImg"
+                alt="验证码"
+                style="width: 100%; height: 100%"
+              />
             </div>
           </a-space>
         </a-form-item>
@@ -68,10 +75,16 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { Message } from "@arco-design/web-vue";
-import { IconUser, IconLock, IconSafe } from "@arco-design/web-vue/es/icon";
 import ApiConfigModal from "@/components/ApiConfigModal.vue";
+import { getCaptcha, login } from "@/api/auth";
+import { useApiStore } from "@/store/api";
+import { useUserStore } from "@/store/user";
+import { Notification } from "@arco-design/web-vue";
+
+const apiStore = useApiStore();
+const userStore = useUserStore();
 
 const formData = reactive({
   username: "",
@@ -79,14 +92,37 @@ const formData = reactive({
   captcha: "",
 });
 
+const captchaImg = reactive({
+  captchaImg: null,
+  uuid: "",
+});
+
+onMounted(() => {
+  apiStore.setInlocalStorage();
+  refreshCaptcha();
+});
 const handleSubmit = () => {
   // 这里处理登录逻辑，实际项目中需要对接后端API
-  Message.success("登录请求已发送");
+  login({
+    username: formData.username,
+    password: formData.password,
+    code: formData.captcha,
+    uuid: captchaImg.uuid,
+  }).then((res) => {
+    Notification.success({
+      title: "登录成功",
+      description: "欢迎回来, " + res.data.username,
+    });
+    userStore.setUserInfo(res.data);
+  });
 };
 
 const refreshCaptcha = () => {
   // 这里处理刷新验证码逻辑，实际项目中需要对接后端API
-  Message.info("验证码已刷新");
+  getCaptcha().then((res) => {
+    captchaImg.captchaImg = res.data.img;
+    captchaImg.uuid = res.data.uuid;
+  });
 };
 
 const apiConfigModalRef = ref(null);

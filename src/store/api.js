@@ -3,11 +3,11 @@ import { defineStore } from 'pinia';
 export const useApiStore = defineStore('api', {
     state: () => ({
         withGateWay: true, // 是否使用网关
-        baseUrlWithGateWay: 'https://api.example.com',
+        baseUrlWithGateWay: 'http://localhost:8020',
         baseUrlWithoutGateWay: [
             {
                 title: 'auth',
-                url: 'https://auth.example.com'
+                url: 'http://localhost:8021'
             },
             {
                 title: 'gateway',
@@ -15,11 +15,11 @@ export const useApiStore = defineStore('api', {
             },
             {
                 title: 'order',
-                url: 'https://order.example.com'
+                url: 'http://localhost:8023'
             },
             {
                 title: 'product',
-                url: 'https://product.example.com'
+                url: 'http://localhost:8026'
             },
             {
                 title: 'ai',
@@ -34,15 +34,21 @@ export const useApiStore = defineStore('api', {
     actions: {
         setWithGateWay(value) {
             this.withGateWay = value;
+            this.setInlocalStorage();
         },
         setBaseUrlWithGateWay(url) {
             this.baseUrlWithGateWay = url;
+            this.setInlocalStorage();
         },
         setBaseUrlWithoutGateWay(title, url) {
             const index = this.baseUrlWithoutGateWay.findIndex(item => item.title === title);
             if (index !== -1) {
                 this.baseUrlWithoutGateWay[index].url = url;
             }
+            this.setInlocalStorage();
+        },
+        setInlocalStorage() {
+            localStorage.setItem('api', JSON.stringify(this.$state));
         }
     }
 });

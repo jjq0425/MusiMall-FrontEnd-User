@@ -7,10 +7,11 @@ export const useUserStore = defineStore('user', {
         tokenExpiry: null,
     }),
     actions: {
-        setUserInfo({ username, token, tokenExpiry }) {
+        setUserInfo({ username, token, expiresIn }) {
             this.username = username;
             this.token = token;
-            this.tokenExpiry = tokenExpiry;
+            this.tokenExpiry = expiresIn;
+            localStorage.setItem('token', token);
         },
         clearUserInfo() {
             this.username = '';

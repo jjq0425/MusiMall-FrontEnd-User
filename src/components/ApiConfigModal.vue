@@ -27,6 +27,7 @@
         </a-table>
       </a-form-item>
     </a-form>
+    <div class="version-info">版本号: {{ buildTimestampShow }}</div>
   </a-modal>
 </template>
 
@@ -34,6 +35,7 @@
 import { ref, reactive, onMounted, defineExpose } from "vue";
 import { useApiStore } from "@/store/api";
 import { Message } from "@arco-design/web-vue";
+import { buildTimestamp } from "@/buildTimestamp.js";
 
 const visible = ref(false);
 const apiStore = useApiStore();
@@ -43,6 +45,8 @@ const formData = reactive({
   baseUrlWithGateWay: "",
   baseUrlWithoutGateWay: [],
 });
+
+const buildTimestampShow = buildTimestamp;
 
 const show = () => {
   // apiStore.baseUrlWithoutGateWay 的proxy 转为普通数组
@@ -72,3 +76,12 @@ defineExpose({
   show,
 });
 </script>
+
+<style scoped>
+.version-info {
+  text-align: right;
+  margin-top: 16px;
+  font-size: 12px;
+  color: #888;
+}
+</style>
