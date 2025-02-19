@@ -3,7 +3,7 @@
     <!-- 商品搜索 -->
     <div class="search">
       <div class="title">
-        <h1 style="margin: 0 auto; text-align: center; font-size: 30px">
+        <h1 style="margin: 0 auto; text-align: center; font-size: 45px">
           优选好物
         </h1>
       </div>
@@ -13,6 +13,8 @@
           v-model="searchValue"
           placeholder="输入商品关键词"
           search-button
+          @search="searchOrGetNow"
+          :loading="productListloading"
         >
           <template #button-icon>
             <icon-search />
@@ -22,35 +24,102 @@
       </div>
     </div>
     <!-- 商品列表 -->
-    <div class="product-list-div">
-      <a-spin :loading="productListloading" tip="加载中...">
-        <ProductList :product-list-info="productListInfo" />
-      </a-spin>
-    </div>
+    <a-spin :loading="productListloading" tip="加载中...">
+      <div
+        class="product-list-div"
+        :class="{ 'empty-container': productListInfo.length === 0 }"
+      >
+        <a-empty v-if="productListInfo.length === 0"> 没有搜索到商品 </a-empty>
+        <template v-else>
+          <ProductList :product-list-info="productListInfo" />
+          <div style="height: 50px"></div>
+          <div class="pagination-div" v-if="productListInfo.length > 0">
+            <a-pagination
+              :total="totalCount"
+              :current="currentPage"
+              :page-size="pageSize"
+              @change="handlePageChange"
+              @page-size-change="handlePageSizeChange"
+              :page-size-options="[8, 16, 32, 64]"
+              show-total
+              show-jumper
+              show-page-size
+            />
+          </div>
+        </template>
+      </div>
+    </a-spin>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import ProductList from "@/views/product/components/ProductList.vue";
+import { getProductList, searchProduct } from "@/api/product";
+import { Message } from "@arco-design/web-vue";
 
 const searchValue = ref("");
 const productListloading = ref(false);
-const productListInfo = reactive([
-  {
-    id: 1833339862330556415,
-    name: "华为笔记本 华为",
-    description: "高:100 长:101 宽:201",
-    picture: "http://117.72.88.11:9002/mall-dev/WX20240815-213011.png",
-    price: 3998.0,
-    quantity: 3000,
-    remainQuantity: 0,
-    categories: [],
-  },
-  // ...更多商品
-]);
+const productListInfo = reactive([]);
 
-console.log("productListInfo", productListInfo);
+// 分页
+const currentPage = ref(1);
+const pageSize = ref(8);
+const totalCount = ref(0);
+
+onMounted(() => {
+  searchValue.value = "";
+  getProductListInfo();
+});
+const searchOrGetNow = () => {
+  if (searchValue.value && searchValue.value.trim() != "") {
+    searchProductInfo();
+  } else {
+    getProductListInfo();
+  }
+};
+
+const getProductListInfo = async () => {
+  productListloading.value = true;
+  const res = await getProductList(currentPage.value, pageSize.value);
+  productListInfo.splice(0, productListInfo.length, ...res.data);
+  totalCount.value = res.totalCount;
+  productListloading.value = false;
+};
+const searchProductInfo = async () => {
+  productListloading.value = true;
+  currentPage.value = 1;
+  const res = await searchProduct(
+    searchValue.value,
+    currentPage.value,
+    pageSize.value
+  ).catch((err) => {
+    Message.error("搜索失败,请稍后再试:" + err);
+    productListloading.value = false;
+  });
+  productListInfo.splice(0, productListInfo.length, ...res.data);
+  totalCount.value = res.totalCount;
+  productListloading.value = false;
+};
+
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  if (searchValue.value) {
+    searchProductInfo();
+  } else {
+    getProductListInfo();
+  }
+};
+
+const handlePageSizeChange = (pageSize_) => {
+  currentPage.value = 1;
+  pageSize.value = pageSize_;
+  if (searchValue.value) {
+    searchProductInfo();
+  } else {
+    getProductListInfo();
+  }
+};
 </script>
 
 <style scoped>
@@ -102,5 +171,29 @@ console.log("productListInfo", productListInfo);
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(176, 191, 231, 0.15);
+  position: relative;
+}
+
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 保持与非空列表时相同的最小高度 */
+  min-height: 400px;
+  min-width: 185vh;
+  margin: 10px auto;
+  margin-top: 40px;
+}
+
+.pagination {
+  margin: 20px auto;
+  min-width: 100%;
+  background: red;
+}
+
+.pagination-div {
+  position: absolute;
+  bottom: 36px;
+  right: 36px;
 }
 </style>

@@ -122,7 +122,6 @@ const menuKeyNow = ref("Product");
 onMounted(() => {
   // 根据当前路由设置菜单选中项
   const menuKey = router.currentRoute.value.name;
-  console.log(menuKey);
   menuKeyNow.value = menuKey;
 });
 

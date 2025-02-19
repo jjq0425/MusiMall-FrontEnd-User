@@ -127,7 +127,6 @@ const handleSubmit = () => {
     uuid: captchaImg.uuid,
   })
     .then((res) => {
-      console.log(res.token == null);
       if (res.token == null) {
         Notification.warning({
           title: "登录失败",
@@ -152,7 +151,6 @@ const handleSubmit = () => {
 const refreshCaptcha = () => {
   // 这里处理刷新验证码逻辑，实际项目中需要对接后端API
   getCaptcha().then((res) => {
-    console.log(res);
     captchaImg.captchaImg = res.img;
     captchaImg.uuid = res.uuid;
   });

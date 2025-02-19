@@ -29,7 +29,7 @@
 
 <script setup>
 import { ref } from "vue";
-import PriceAndStockShow from "@/views/product/components/priceAndStockShow.vue";
+import PriceAndStockShow from "@/views/product/components/PriceAndStockShow.vue";
 
 const props = defineProps({
   product: {
@@ -37,12 +37,12 @@ const props = defineProps({
     required: true,
   },
 });
-console.log("product", props.product);
 </script>
 
 <style scoped>
 .product-card {
   width: 240px;
+  margin-bottom: 20px;
 }
 
 .product-info {
