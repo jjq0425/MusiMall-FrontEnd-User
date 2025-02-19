@@ -103,9 +103,9 @@
       <router-view />
     </main>
     <ApiConfigModal ref="apiConfigModalRef" />
-    <footer class="footer">
+    <!-- <footer class="footer">
       <p>&copy; 2025 MusiMall. All rights reserved.</p>
-    </footer>
+    </footer> -->
   </div>
 </template>
 
