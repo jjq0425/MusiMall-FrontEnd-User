@@ -13,7 +13,7 @@ request.interceptors.request.use(
     config => {
         const token = localStorage.getItem('token')
         if (token) {
-            config.headers['Authorization'] = `Bearer@${token}`
+            config.headers['Authorization'] = `Basic@${token}`
         }
         // 在服务器测试时候不带baseUrl，在NetworkSetting已经带了
         if (config.NetworkSetting == null || !config.NetworkSetting) {

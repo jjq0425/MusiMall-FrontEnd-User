@@ -16,3 +16,10 @@ export const getCaptcha = () => {
         method: 'get',
     })
 }
+
+export const logout = () => {
+    return request({
+        url: `${baseUrl}/web/user/logout`,
+        method: 'post',
+    })
+}

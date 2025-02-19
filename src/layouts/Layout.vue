@@ -1,0 +1,198 @@
+<template>
+  <div class="layout">
+    <a-page-header :show-back="false">
+      <template #title>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            width: 200px;
+            justify-content: flex-end;
+          "
+        >
+          <img
+            src="@/assets/logo/logo.png"
+            alt="MusiMall Logo"
+            class="login-logo"
+          />
+          <a-space>
+            <span>MusiMall</span>
+          </a-space>
+        </div>
+      </template>
+      <template #subtitle>
+        <a-space>
+          <span>ByteAndHeartDance</span>
+        </a-space>
+      </template>
+      <template #extra>
+        <div style="">
+          <div
+            style="
+              width: 900px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <a-menu mode="horizontal" :default-selected-keys="['1']">
+              <a-menu-item key="1">优选好物</a-menu-item>
+              <a-menu-item key="2">购物小车</a-menu-item>
+              <a-menu-item key="3">我的订单</a-menu-item>
+              <a-menu-item key="4">个人中心</a-menu-item>
+            </a-menu>
+            <a-tooltip content="API设置" position="bottom">
+              <icon-wifi @click="showApiConfigModal" class="right-ICON" />
+            </a-tooltip>
+            <a-tooltip content="退出登录" position="bottom">
+              <icon-export
+                @click="handleLogout"
+                style="color: red"
+                class="right-ICON"
+              />
+            </a-tooltip>
+          </div>
+
+          <!-- <div class="user-actions">
+            <a-dropdown trigger="hover">
+              <a-button
+                type="text"
+                style="color: black; font-weight: bold; font-size: 15px"
+                shape="round"
+              >
+                <icon-user style="margin-right: 5px" />
+                {{
+                  currentUserName == null ? "欢迎" : currentUserName
+                }}</a-button
+              >
+              <template #content>
+                <a-doption @click="handleLogout">
+                  <template #icon>
+                    <icon-export style="color: red" />
+                  </template>
+                  <template #default
+                    ><span style="color: red">退出登录</span></template
+                  >
+                </a-doption>
+                <a-doption @click="showApiConfigModal">
+                  <template #icon>
+                    <icon-wifi />
+                  </template>
+                  <template #default>API配置</template>
+                </a-doption>
+              </template>
+            </a-dropdown>
+          </div> -->
+        </div>
+      </template>
+    </a-page-header>
+
+    <main class="main">
+      <router-view />
+    </main>
+    <ApiConfigModal ref="apiConfigModalRef" />
+    <footer class="footer">
+      <p>&copy; 2025 MusiMall. All rights reserved.</p>
+    </footer>
+  </div>
+</template>
+
+<script setup>
+import { PageHeader } from "@arco-design/web-vue";
+import ApiConfigModal from "@/components/ApiConfigModal.vue";
+import { onMounted, ref } from "vue";
+import { useUserStore } from "@/store/user";
+
+const userStore = useUserStore();
+
+onMounted(() => {});
+
+const handleLogout = () => {
+  userStore.clearUserInfo();
+};
+
+const apiConfigModalRef = ref(null);
+const showApiConfigModal = () => {
+  apiConfigModalRef.value.show();
+};
+</script>
+
+<style scoped>
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.login-logo {
+  width: 50px;
+  height: auto;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translateX(-50%) translateY(0%);
+}
+
+.header {
+  background-color: #333;
+  color: white;
+}
+
+.right-ICON {
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+.nav {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin: 16px;
+}
+
+.nav a {
+  color: #333;
+  margin-left: 16px;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  color: black;
+}
+
+.user-actions a {
+  margin-left: 16px;
+  text-decoration: none;
+}
+
+.user-actions a:hover {
+  text-decoration: underline;
+}
+
+.cart-icon {
+  font-size: 24px;
+  margin-left: 16px;
+  cursor: pointer;
+}
+
+.main {
+  flex: 1;
+  padding: 32px;
+  background-color: #f5f5f5;
+}
+
+.footer {
+  text-align: center;
+  padding: 16px;
+  background-color: #333;
+  color: white;
+}
+</style>

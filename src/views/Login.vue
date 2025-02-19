@@ -65,7 +65,13 @@
           </a-space>
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" html-type="submit" long>登录</a-button>
+          <a-button
+            type="primary"
+            html-type="submit"
+            long
+            :loading="loginLoading"
+            >登录</a-button
+          >
         </a-form-item>
       </a-form>
       <!-- <a-button type="text">没有账号？点击注册</a-button> -->
@@ -84,6 +90,7 @@ import { useApiStore } from "@/store/api";
 import { useUserStore } from "@/store/user";
 import { Notification } from "@arco-design/web-vue";
 import { IconWifi } from "@arco-design/web-vue/es/icon";
+import router from "@/router";
 
 const apiStore = useApiStore();
 const userStore = useUserStore();
@@ -102,34 +109,44 @@ const captchaImg = reactive({
 onMounted(() => {
   apiStore.setInlocalStorage();
   refreshCaptcha();
+  loginLoading.value = false;
 });
+
+const loginLoading = ref(false);
 const handleSubmit = () => {
   // 校验表单
   if (!formData.username || !formData.password || !formData.captcha) {
     Message.error("请填写完整信息");
     return;
   }
+  loginLoading.value = true;
   login({
     username: formData.username,
     password: formData.password,
     code: formData.captcha,
     uuid: captchaImg.uuid,
-  }).then((res) => {
-    console.log(res.token == null);
-    if (res.token == null) {
-      Notification.warning({
-        title: "登录失败",
-        content: res.message,
-      });
-      return;
-    } else {
-      Notification.success({
-        title: "登录成功",
-        content: "欢迎回来, " + res.username,
-      });
-      userStore.setUserInfo(res);
-    }
-  });
+  })
+    .then((res) => {
+      console.log(res.token == null);
+      if (res.token == null) {
+        Notification.warning({
+          title: "登录失败",
+          content: res.message,
+        });
+        return;
+      } else {
+        Notification.success({
+          title: "登录成功",
+          content: "欢迎回来, " + res.username,
+        });
+        userStore.setUserInfo(res);
+        loginLoading.value = false;
+        router.push({ name: "Product" });
+      }
+    })
+    .finally(() => {
+      loginLoading.value = false;
+    });
 };
 
 const refreshCaptcha = () => {
