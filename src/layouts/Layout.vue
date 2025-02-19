@@ -8,7 +8,9 @@
             align-items: center;
             width: 200px;
             justify-content: flex-end;
+            cursor: pointer;
           "
+          @click="() => router.push({ name: 'Product' })"
         >
           <img
             src="@/assets/logo/logo.png"

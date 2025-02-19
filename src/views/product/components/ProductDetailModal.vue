@@ -108,13 +108,25 @@ const product = reactive({
   remainQuantity: 1000,
 });
 const showModal = async (productId) => {
+  Message.loading({
+    content: "加载中...",
+    id: "productDetail",
+  });
   const res = await getProductById(productId).catch((err) => {
-    Message.error("获取商品详情失败,请稍后再试:" + err);
+    Message.error({
+      content: `获取商品详情失败,请稍后再试:${err}`,
+      id: "productDetail",
+    });
   });
   if (res.id != null) {
     Object.assign(product, res);
     console.log(product);
     visible.value = true;
+    Message.success({
+      content: "加载成功",
+      id: "productDetail",
+      duration: 500,
+    });
   }
 };
 defineExpose({ showModal });
