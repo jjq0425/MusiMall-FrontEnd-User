@@ -4,9 +4,21 @@ import router from '../router'
 import { Message } from '@arco-design/web-vue'
 import { NeedOuterResponsePrase, gatewayUrlChoose } from '../handler/gatewayUrlChoose'
 
+import jsonBig from 'json-bigint'
 
 const request = axios.create({
-    timeout: 25000
+    timeout: 25000,
+    // 解决传回来的ID过大问题：https://blog.csdn.net/qq_68155756/article/details/138720242
+    transformResponse: [function (data) {//transformResponse这个配置项可以拦截接口返回的内容进行处理
+        try {
+            // 如果大数字类型转换成功则返回转换的数据结果
+            return jsonBig.parse(data);
+        } catch (err) {
+            // 如果转换失败，代表没有长数字可转，正常解析并返回
+            return JSON.parse(data)
+        }
+    }]
+
 })
 
 request.interceptors.request.use(
@@ -37,6 +49,10 @@ request.interceptors.response.use(
         if (response?.data?.code !== 200) {
             if (response?.data?.message !== null && response?.data?.message !== "") {
                 Message.warning(response?.data?.message)
+                if (response?.data?.message == "请先登录") {
+                    localStorage.removeItem('token')
+                    router.push('/login')
+                }
             }
             return Promise.reject(response)
         } else {

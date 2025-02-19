@@ -27,3 +27,8 @@ export const searchProduct = (keyword, page, pageSize) => {
         }
     })
 }
+
+
+export const getProductById = (id) => {
+    return request.get(`${baseUrl}/product/${id}`)
+}

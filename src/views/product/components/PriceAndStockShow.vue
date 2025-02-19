@@ -1,11 +1,11 @@
 <template>
   <div class="price-stock">
     <div class="price" v-if="!isStockOut">
-      <img
+      <!-- <img
         src="@/assets/coin/coin.png"
         alt="coin"
         style="width: 22px; height: 22px; margin-right: 1px"
-      />
+      /> -->￥
       {{ price }}
     </div>
     <div class="price" v-if="isStockOut" style="color: grey">已售罄</div>
