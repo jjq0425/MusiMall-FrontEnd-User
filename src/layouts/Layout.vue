@@ -35,11 +35,23 @@
               justify-content: center;
             "
           >
-            <a-menu mode="horizontal" :default-selected-keys="['1']">
-              <a-menu-item key="1">优选好物</a-menu-item>
-              <a-menu-item key="2">购物小车</a-menu-item>
-              <a-menu-item key="3">我的订单</a-menu-item>
-              <a-menu-item key="4">个人中心</a-menu-item>
+            <a-menu
+              mode="horizontal"
+              :default-selected-keys="['product']"
+              :selected-keys="menuKeyNow"
+            >
+              <router-link to="Product">
+                <a-menu-item key="Product">优选好物</a-menu-item>
+              </router-link>
+              <router-link to="Shopping-Cart">
+                <a-menu-item key="Shopping-Cart">购物小车</a-menu-item>
+              </router-link>
+              <router-link to="Order">
+                <a-menu-item key="Order">我的订单</a-menu-item>
+              </router-link>
+              <router-link to="User-center">
+                <a-menu-item key="User-center">个人中心</a-menu-item>
+              </router-link>
             </a-menu>
             <a-tooltip content="API设置" position="bottom">
               <icon-wifi @click="showApiConfigModal" class="right-ICON" />
@@ -102,10 +114,17 @@ import { PageHeader } from "@arco-design/web-vue";
 import ApiConfigModal from "@/components/ApiConfigModal.vue";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "@/store/user";
+import router from "@/router";
 
 const userStore = useUserStore();
 
-onMounted(() => {});
+const menuKeyNow = ref("Product");
+onMounted(() => {
+  // 根据当前路由设置菜单选中项
+  const menuKey = router.currentRoute.value.name;
+  console.log(menuKey);
+  menuKeyNow.value = menuKey;
+});
 
 const handleLogout = () => {
   userStore.clearUserInfo();
