@@ -1,5 +1,14 @@
-# Vue 3 + Vite
+# MusiMall 用户前端
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+青训营后端项目适配前端
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+### 启动方法
+
+```bash
+yarn install
+yarn dev
+```
+
+### 技术框架
+
+vue3、arco-design

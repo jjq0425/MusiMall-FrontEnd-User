@@ -122,7 +122,18 @@ import router from "@/router";
 const userStore = useUserStore();
 
 const menuKeyNow = computed(() => {
-  return router.currentRoute.value.name;
+  if (router.currentRoute.value.name.includes("Product")) {
+    return "Product";
+  }
+  if (router.currentRoute.value.name.includes("ShoppingCart")) {
+    return "ShoppingCart";
+  }
+  if (router.currentRoute.value.name.includes("Order")) {
+    return "Order";
+  }
+  if (router.currentRoute.value.name.includes("UserCenter")) {
+    return "UserCenter";
+  }
 });
 onMounted(() => {});
 

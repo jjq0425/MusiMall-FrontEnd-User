@@ -35,6 +35,17 @@ const routes = [
       }
     ]
   },
+  {
+    path: '/order',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'Order',
+        component: () => import('@/views/order/order.vue')
+      }
+    ]
+  }
 
 ]
 
