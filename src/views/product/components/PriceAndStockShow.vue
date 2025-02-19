@@ -49,11 +49,11 @@ const isStockOut = computed(() => {
 });
 
 const isStockApprochOut = computed(() => {
-  return props.remainQuantity <= 100 && props.remainQuantity > 0;
+  return props.remainQuantity <= 20 && props.remainQuantity > 0;
 });
 
 const isNewStock = computed(() => {
-  return props.totalQuantity - props.remainQuantity <= 100;
+  return props.totalQuantity - props.remainQuantity <= 20;
 });
 </script>
 

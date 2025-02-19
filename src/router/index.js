@@ -23,7 +23,19 @@ const routes = [
         component: () => import('@/views/product/product.vue')
       }
     ]
-  }
+  },
+  {
+    path: '/userCenter',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'UserCenter',
+        component: () => import('@/views/user/userCenter.vue')
+      }
+    ]
+  },
+
 ]
 
 const router = createRouter({

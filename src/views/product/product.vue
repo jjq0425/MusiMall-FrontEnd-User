@@ -24,31 +24,36 @@
       </div>
     </div>
     <!-- 商品列表 -->
-    <a-spin :loading="productListloading" tip="加载中...">
-      <div
-        class="product-list-div"
-        :class="{ 'empty-container': productListInfo.length === 0 }"
+
+    <div class="product-list-div">
+      <a-empty
+        v-if="productListInfo.length === 0 && !productListloading"
+        style="padding-top: 80px"
       >
-        <a-empty v-if="productListInfo.length === 0"> 没有搜索到商品 </a-empty>
-        <template v-else>
-          <ProductList :product-list-info="productListInfo" />
-          <div style="height: 50px"></div>
-          <div class="pagination-div" v-if="productListInfo.length > 0">
-            <a-pagination
-              :total="totalCount"
-              :current="currentPage"
-              :page-size="pageSize"
-              @change="handlePageChange"
-              @page-size-change="handlePageSizeChange"
-              :page-size-options="[8, 16, 32, 64]"
-              show-total
-              show-jumper
-              show-page-size
-            />
-          </div>
+        没有搜索到商品
+      </a-empty>
+      <a-empty v-else-if="productListloading" style="padding-top: 80px">
+        <template #image>
+          <icon-loading style="font-size: 68px; color: #165dff" />
         </template>
+        <div style="margin-top: 25px; font-size: 20px">加载中，请稍后...</div>
+      </a-empty>
+      <ProductList :product-list-info="productListInfo" />
+      <div style="height: 50px"></div>
+      <div class="pagination-div" v-if="productListInfo.length > 0">
+        <a-pagination
+          :total="totalCount"
+          :current="currentPage"
+          :page-size="pageSize"
+          @change="handlePageChange"
+          @page-size-change="handlePageSizeChange"
+          :page-size-options="[8, 16, 32, 64]"
+          show-total
+          show-jumper
+          show-page-size
+        />
       </div>
-    </a-spin>
+    </div>
   </div>
 </template>
 
@@ -172,17 +177,6 @@ const handlePageSizeChange = (pageSize_) => {
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(176, 191, 231, 0.15);
   position: relative;
-}
-
-.empty-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* 保持与非空列表时相同的最小高度 */
-  min-height: 400px;
-  min-width: 185vh;
-  margin: 10px auto;
-  margin-top: 40px;
 }
 
 .pagination {

@@ -36,21 +36,22 @@
             "
           >
             <a-menu
+              class="navMenu"
               mode="horizontal"
-              :default-selected-keys="['product']"
+              :default-selected-keys="['Product']"
               :selected-keys="menuKeyNow"
             >
               <router-link to="Product">
                 <a-menu-item key="Product">优选好物</a-menu-item>
               </router-link>
-              <router-link to="Shopping-Cart">
-                <a-menu-item key="Shopping-Cart">购物小车</a-menu-item>
+              <router-link to="ShoppingCart">
+                <a-menu-item key="ShoppingCart">购物小车</a-menu-item>
               </router-link>
               <router-link to="Order">
                 <a-menu-item key="Order">我的订单</a-menu-item>
               </router-link>
-              <router-link to="User-center">
-                <a-menu-item key="User-center">个人中心</a-menu-item>
+              <router-link to="UserCenter">
+                <a-menu-item key="UserCenter">个人中心</a-menu-item>
               </router-link>
             </a-menu>
             <a-tooltip content="API设置" position="bottom">
@@ -112,18 +113,16 @@
 <script setup>
 import { PageHeader } from "@arco-design/web-vue";
 import ApiConfigModal from "@/components/ApiConfigModal.vue";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useUserStore } from "@/store/user";
 import router from "@/router";
 
 const userStore = useUserStore();
 
-const menuKeyNow = ref("Product");
-onMounted(() => {
-  // 根据当前路由设置菜单选中项
-  const menuKey = router.currentRoute.value.name;
-  menuKeyNow.value = menuKey;
+const menuKeyNow = computed(() => {
+  return router.currentRoute.value.name;
 });
+onMounted(() => {});
 
 const handleLogout = () => {
   userStore.clearUserInfo();
@@ -136,6 +135,10 @@ const showApiConfigModal = () => {
 </script>
 
 <style scoped>
+* {
+  overflow: hidden;
+}
+
 .layout {
   display: flex;
   flex-direction: column;
@@ -212,5 +215,11 @@ const showApiConfigModal = () => {
   padding: 16px;
   background-color: #333;
   color: white;
+}
+
+::v-deep .arco-menu-selected {
+  color: #165dff;
+  font-weight: bold !important;
+  position: relative;
 }
 </style>

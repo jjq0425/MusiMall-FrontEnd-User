@@ -12,7 +12,11 @@
       <div class="info-section">
         <h2 class="product-name">{{ product.name }}</h2>
         <p class="description">{{ product.description }}</p>
-        <div class="price">售价: ￥{{ product.price }}</div>
+        <div class="price" v-if="product.remainQuantity > 0">
+          单价: ￥{{ product.price }}/件
+        </div>
+        <div class="price" style="color: grey" v-else>已售罄</div>
+
         <div class="stock-info">
           <span class="stock-text">
             已售: {{ product.quantity - product.remainQuantity }}
@@ -28,14 +32,14 @@
             已售罄
           </a-tag>
           <a-tag
-            v-else-if="product.remainQuantity <= 100"
+            v-else-if="product.remainQuantity <= 20"
             color="orange"
             style="font-size: 12px"
           >
             库存告急
           </a-tag>
           <a-tag
-            v-else-if="product.quantity - product.remainQuantity <= 100"
+            v-else-if="product.quantity - product.remainQuantity <= 20"
             color="green"
             style="font-size: 12px"
           >
@@ -43,36 +47,41 @@
           </a-tag>
           <a-tag v-else color="blue" style="font-size: 12px">备货充足</a-tag>
         </div>
-        <div class="purchase">
-          <div>
-            <a-input-number
-              :style="{ width: '220px' }"
-              placeholder="Please Enter"
-              mode="button"
-              size="large"
-              class="input-demo"
-              v-model="count"
-              :min="1"
-              :max="product.remainQuantity"
-            />
+        <div style="border-radius: 12px" class="footer">
+          <div class="total-price" v-if="product.remainQuantity > 0">
+            <span style="font-weight: bold">总金额：</span> ￥{{ totalPrice }}
           </div>
-
-          <div class="purchase-btn-group">
-            <div class="purchase-btn" @click="addToCart">
-              <SvgIcon name="shoppingCartWhite" size="12px" />
-              <span style="color: white; font-weight: bold; font-size: 15px">
-                <!-- <icon-plus-circle /> -->
-
-                加入购物车
-              </span>
+          <div class="purchase" v-if="product.remainQuantity > 0">
+            <div>
+              <a-input-number
+                :style="{ width: '220px' }"
+                placeholder="Please Enter"
+                mode="button"
+                size="large"
+                class="input-demo"
+                v-model="count"
+                :min="1"
+                :max="product.remainQuantity"
+              />
             </div>
-            <div class="purchase-btn-2" @click="addToCart">
-              <SvgIcon name="makeOrderWhite" size="13px" />
-              <span style="color: white; font-weight: bold; font-size: 15px">
-                <!-- <icon-plus-circle /> -->
 
-                直接购买
-              </span>
+            <div class="purchase-btn-group">
+              <div class="purchase-btn" @click="addToCart">
+                <SvgIcon name="shoppingCartWhite" size="12px" />
+                <span style="color: white; font-weight: bold; font-size: 15px">
+                  <!-- <icon-plus-circle /> -->
+
+                  加入购物车
+                </span>
+              </div>
+              <div class="purchase-btn-2" @click="makeOrderDirect">
+                <SvgIcon name="makeOrderWhite" size="13px" />
+                <span style="color: white; font-weight: bold; font-size: 15px">
+                  <!-- <icon-plus-circle /> -->
+
+                  直接购买
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -82,7 +91,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, defineExpose } from "vue";
+import { reactive, ref, defineExpose, computed } from "vue";
 import { getProductById } from "@/api/product";
 import { Message } from "@arco-design/web-vue";
 import SvgIcon from "@/components/SvgIcon.vue";
@@ -114,6 +123,12 @@ const addToCart = () => {
   visible.value = false;
   Message.success("已加入购物车");
 };
+
+const makeOrderDirect = () => {};
+
+const totalPrice = computed(() => {
+  return (product.price * count.value).toFixed(2);
+});
 </script>
 
 <style scoped>
@@ -121,6 +136,7 @@ const addToCart = () => {
   display: flex;
   gap: 16px;
   padding: 16px;
+  min-height: 400px;
 }
 
 .image-section {
@@ -163,6 +179,14 @@ const addToCart = () => {
   margin: 8px 0;
 }
 
+.total-price {
+  font-size: 16px;
+  color: grey;
+  /* font-weight: bold; */
+  /* position: absolute; */
+  bottom: 0px;
+}
+
 .stock-info {
   display: flex;
   align-items: center;
@@ -183,12 +207,12 @@ const addToCart = () => {
 }
 
 .purchase {
-  margin-top: 20px;
+  margin-top: 0px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  position: absolute;
+  /* position: absolute; */
   bottom: 60px;
 }
 
@@ -216,5 +240,14 @@ const addToCart = () => {
 .purchase-btn-group {
   display: flex;
   gap: 0px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 80px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgb(248, 249, 252);
+  /* 背景透明度 */
 }
 </style>
