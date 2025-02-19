@@ -2,19 +2,27 @@
   <a-card hoverable class="product-card" @click="showProductDetailModal">
     <template #cover>
       <div style="border-radius: 12px">
-        <img
+        <a-image
           :style="{
-            width: '240px',
-            height: '135px',
             overflow: 'hidden',
           }"
-          style="border-radius: 12px 12px 12px 0"
+          style="border-radius: 12px 12px 18px 0"
+          width="240px"
+          height="135px"
           :src="product.picture"
           :alt="product.name"
+          :preview="false"
         />
       </div>
     </template>
-    <a-card-meta :title="product.name" :description="product.description">
+    <a-card-meta
+      :title="product.name"
+      :description="
+        product.description.length > 20
+          ? product.description.slice(0, 18) + '...'
+          : product.description
+      "
+    >
       <template #avatar>
         <!-- 金额显示 -->
         <price-and-stock-show

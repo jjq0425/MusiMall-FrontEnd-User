@@ -7,7 +7,15 @@
   >
     <div class="product-detail-modal">
       <div class="image-section">
-        <img :src="product.picture" :alt="product.name" class="product-image" />
+        <div>
+          <a-image
+            :src="product.picture"
+            :alt="product.name"
+            class="product-image"
+            width="400px"
+            height="400px"
+          />
+        </div>
       </div>
       <div class="info-section">
         <h2 class="product-name">{{ product.name }}</h2>
@@ -159,7 +167,8 @@ const totalPrice = computed(() => {
 }
 
 .product-image {
-  max-width: 400px;
+  width: 400px;
+
   border-radius: 8px;
   border: 1px solid #eee;
 }
