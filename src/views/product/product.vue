@@ -38,9 +38,15 @@
         </template>
         <div style="margin-top: 25px; font-size: 20px">加载中，请稍后...</div>
       </a-empty>
-      <ProductList :product-list-info="productListInfo" />
-      <div style="height: 50px"></div>
-      <div class="pagination-div" v-if="productListInfo.length > 0">
+      <ProductList :product-list-info="productListInfo" v-else />
+      <div
+        style="height: 50px"
+        v-if="productListInfo.length > 0 && !productListloading"
+      ></div>
+      <div
+        class="pagination-div"
+        v-if="productListInfo.length > 0 && !productListloading"
+      >
         <a-pagination
           :total="totalCount"
           :current="currentPage"
