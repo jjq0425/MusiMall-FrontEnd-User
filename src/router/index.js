@@ -18,7 +18,7 @@ const routes = [
     component: Layout,
     children: [
       {
-        path: '',
+        path: '/product',
         name: 'Product',
         component: () => import('@/views/product/product.vue')
       }
@@ -29,7 +29,7 @@ const routes = [
     component: Layout,
     children: [
       {
-        path: '',
+        path: '/user-center',
         name: 'UserCenter',
         component: () => import('@/views/user/userCenter.vue')
       }
@@ -40,13 +40,17 @@ const routes = [
     component: Layout,
     children: [
       {
-        path: '',
+        path: '/order',
         name: 'Order',
         component: () => import('@/views/order/order.vue')
+      },
+      {
+        path: '/order/detail/:id',
+        name: 'Order-Detail',
+        component: () => import('@/views/order/components/OrderDetail.vue')
       }
     ]
   }
-
 ]
 
 const router = createRouter({

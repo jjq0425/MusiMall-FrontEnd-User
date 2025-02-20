@@ -23,7 +23,9 @@
         v-for="address in addresses"
         :key="address.id"
         class="address-item"
-        :class="{ 'default-address': address.addressIsDefault }"
+        :class="{
+          'default-address': address.addressIsDefault && showType === 'detail',
+        }"
       >
         <div class="address-info">
           <p class="receiver-name">
@@ -68,6 +70,15 @@
             />
           </a-tooltip>
         </div>
+        <div
+          class="address-actions"
+          v-if="showType === 'choose'"
+          style="margin-left: 20px"
+        >
+          <a-button type="primary" @click="chooseAddress(address)"
+            >选择</a-button
+          >
+        </div>
       </div>
       <a-pagination
         v-if="addresses.length !== 0 && !addressListloading"
@@ -89,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineExpose } from "vue";
+import { ref, reactive, defineExpose, defineEmits } from "vue";
 import AddressDetailModal from "./AddressDetailModal.vue";
 import AddressEditModal from "./AddressEditModal.vue";
 import { Message } from "@arco-design/web-vue";
@@ -99,6 +110,8 @@ const addresses = reactive([]);
 
 const addressDetailModalRef = ref(null);
 const addressEditModalRef = ref(null);
+
+const showType = ref("detail"); // detail, choose
 
 const addAddressNow = () => {
   addressEditModalRef.value.showModal();
@@ -111,6 +124,12 @@ const viewAddressNow = (address) => {
 const editAddressNow = (address) => {
   addressEditModalRef.value.showModal(address);
 };
+
+const chooseAddress = (address) => {
+  emit("choose", address);
+};
+
+const emit = defineEmits(["choose"]);
 
 import {
   getAddressList,
@@ -153,7 +172,9 @@ const setDefaultAddressNow = (id) => {
   });
 };
 
-const initAddrress = () => {
+const initAddrress = (type = "detail") => {
+  showType.value = type;
+  addressListloading.value = true;
   getAddressListNow();
 };
 

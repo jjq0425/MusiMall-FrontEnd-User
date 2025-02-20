@@ -13,6 +13,7 @@
     "@arco-design/web-vue": "^2.56.3",
     "axios": "^1.7.9",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.13",
     "fast-glob": "^3.3.3",
     "json-bigint": "^1.0.0",
     "pinia": "^3.0.1",

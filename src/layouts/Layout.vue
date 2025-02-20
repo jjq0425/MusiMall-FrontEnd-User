@@ -43,18 +43,18 @@
               :default-selected-keys="['Product']"
               :selected-keys="menuKeyNow"
             >
-              <router-link to="Product">
-                <a-menu-item key="Product">优选好物</a-menu-item>
-              </router-link>
-              <router-link to="ShoppingCart">
-                <a-menu-item key="ShoppingCart">购物小车</a-menu-item>
-              </router-link>
-              <router-link to="Order">
-                <a-menu-item key="Order">我的订单</a-menu-item>
-              </router-link>
-              <router-link to="UserCenter">
-                <a-menu-item key="UserCenter">个人中心</a-menu-item>
-              </router-link>
+              <a-menu-item key="Product" @click="routeTo('Product')"
+                >优选好物</a-menu-item
+              >
+              <a-menu-item key="ShoppingCart" @click="routeTo('ShoppingCart')"
+                >购物小车</a-menu-item
+              >
+              <a-menu-item key="Order" @click="routeTo('Order')"
+                >我的订单</a-menu-item
+              >
+              <a-menu-item key="UserCenter" @click="routeTo('UserCenter')"
+                >个人中心</a-menu-item
+              >
             </a-menu>
             <a-tooltip content="API设置" position="bottom">
               <icon-wifi @click="showApiConfigModal" class="right-ICON" />
@@ -135,6 +135,10 @@ const menuKeyNow = computed(() => {
     return "UserCenter";
   }
 });
+
+const routeTo = (key) => {
+  router.push({ name: key });
+};
 onMounted(() => {});
 
 const handleLogout = () => {
