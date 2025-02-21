@@ -1,0 +1,1 @@
+import{g as r}from"./index-BsPeHFIG.js";const e="/api/shoppingCart/v1/shoppingCart",p=(t,a)=>r({url:`${e}/getShoppingCart`,method:"post",data:{pageNo:t,pageSize:a}}),s=(t,a)=>r({url:`${e}/insertOrUpdate`,method:"post",data:{productId:t,quantity:a}});export{s as a,p as g};
