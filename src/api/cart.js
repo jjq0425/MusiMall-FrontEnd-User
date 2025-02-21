@@ -24,3 +24,11 @@ export const addCart = (productId, quantity) => {
         }
     })
 }
+
+export const removeCartItem = (cartItemId) => {
+    return request({
+        url: `${baseUrl}/deleteProduct/${cartItemId}`,
+        method: 'put',
+
+    })
+}
