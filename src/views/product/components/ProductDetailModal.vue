@@ -102,6 +102,7 @@
 <script setup>
 import { reactive, ref, defineExpose, computed } from "vue";
 import { getProductById } from "@/api/product";
+import { addCart } from "@/api/cart";
 import { Message } from "@arco-design/web-vue";
 import SvgIcon from "@/components/SvgIcon.vue";
 import OrderConfirmationDrawer from "@/views/order/components/OrderConfirmationDrawer.vue";
@@ -141,9 +142,43 @@ const showModal = async (productId) => {
 };
 defineExpose({ showModal });
 
-const addToCart = () => {
+const addToCartLoading = ref(false);
+const addToCart = async () => {
+  if (addToCartLoading.value) {
+    return;
+  }
+  addToCartLoading.value = true;
+  Message.loading({
+    content: "加入购物车中...",
+    id: "addToCart",
+  });
+  if (count.value > product.remainQuantity) {
+    Message.error("购买数量超过库存");
+    return;
+  }
+  if (count.value <= 0) {
+    Message.error("购买数量不能小于1");
+    return;
+  }
+  const res = await addCart(product.id, count.value).finally(() => {
+    addToCartLoading.value = false;
+  });
+  if (res.code == 200) {
+    Message.success({
+      content: res.message == null ? "加入购物车成功" : res.message,
+      id: "addToCart",
+      duration: 500,
+    });
+  } else {
+    Message.error({
+      content: "加入购物车失败",
+      id: "addToCart",
+      duration: 500,
+    });
+  }
+  addToCartLoading.value = false;
+
   visible.value = false;
-  Message.success("已加入购物车");
 };
 
 const OrderConfirmationDrawerRef = ref(null);

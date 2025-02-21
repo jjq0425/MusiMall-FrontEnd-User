@@ -46,7 +46,7 @@
               <a-menu-item key="Product" @click="routeTo('Product')"
                 >优选好物</a-menu-item
               >
-              <a-menu-item key="ShoppingCart" @click="routeTo('ShoppingCart')"
+              <a-menu-item key="Cart" @click="routeTo('Cart')"
                 >购物小车</a-menu-item
               >
               <a-menu-item key="Order" @click="routeTo('Order')"
@@ -127,8 +127,8 @@ const menuKeyNow = computed(() => {
   if (router.currentRoute.value.name.includes("Product")) {
     return "Product";
   }
-  if (router.currentRoute.value.name.includes("ShoppingCart")) {
-    return "ShoppingCart";
+  if (router.currentRoute.value.name.includes("Cart")) {
+    return "Cart";
   }
   if (router.currentRoute.value.name.includes("Order")) {
     return "Order";
