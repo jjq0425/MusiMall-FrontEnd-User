@@ -32,3 +32,15 @@ export const removeCartItem = (cartItemId) => {
 
     })
 }
+
+
+export const updateCartItemQuantity = (cartItemId, quantity) => {
+    return request({
+        url: `${baseUrl}/updateShoppingCart`,
+        method: 'put',
+        data: {
+            id: cartItemId,
+            quantity: quantity
+        }
+    })
+}
