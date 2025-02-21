@@ -51,7 +51,7 @@ request.interceptors.response.use(
                 Message.warning(response?.data?.message)
                 if (response?.data?.message == "请先登录") {
                     localStorage.removeItem('token')
-                    router.push('/login')
+                    router.push({name: 'Login'})
                 }
             }
             return Promise.reject(response)

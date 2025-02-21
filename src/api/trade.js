@@ -47,16 +47,28 @@ export const preCreateTradeId = () => {
     })
 }
 
-export const createByDirect = (id, deliveryAddressId, cartProducts, remark) => {
-    return request({
-        url: `${baseUrl}/createByDirect`,
-        method: 'post',
-        data: {
-            id: id,
-            deliveryAddressId: deliveryAddressId,
-            cartProducts: cartProducts,
-            remark: remark
-        }
-    })
+export const createOrderDirectOrCart = (type,id, deliveryAddressId, cartProducts, remark) => {
+    if(type=="direct"){
+        return request({
+            url: `${baseUrl}/createByDirect`,
+            method: 'post',
+            data: {
+                id: id,
+                deliveryAddressId: deliveryAddressId,
+                cartProducts: cartProducts,
+                remark: remark
+            }
+        })
+    }else if(type=="cartAll"){
+        return request({
+            url: `${baseUrl}/create`,
+            method: 'post',
+            data: {
+                deliveryAddressId: deliveryAddressId,
+                id: id,
+                remark: remark
+            }
+        })
+    }
 }
 

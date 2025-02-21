@@ -119,6 +119,7 @@ const product = reactive({
   remainQuantity: 1000,
 });
 const showModal = async (productId) => {
+  count.value = 1;
   Message.loading({
     content: "加载中...",
     id: "productDetail",

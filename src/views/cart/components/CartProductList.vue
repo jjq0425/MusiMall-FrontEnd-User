@@ -33,6 +33,7 @@
           <a-list-item-meta>
             <template #avatar>
               <a-checkbox
+                v-if="props.canChange"
                 :model-value="isCheked(item.id)"
                 @change="handleCheckChange(item.id)"
               />
@@ -66,9 +67,11 @@
                     mode="button"
                     style="width: 150px"
                     @change="updateQuantity(item.id, item.quantity)"
+                    v-if="props.canChange"
                   />
+                  <span v-else>{{ item.quantity }}</span>
                 </a-descriptions-item>
-                <a-descriptions-item label="">
+                <a-descriptions-item label="" v-if="props.canChange">
                   <a-button
                     type="text"
                     @click="removeItem(item.id)"
@@ -94,6 +97,7 @@
         </a-list-item>
       </template>
     </a-list>
+    <OrderConfirmationDrawer ref="orderConfirmationDrawerRef" />
   </div>
 </template>
 
@@ -103,26 +107,37 @@ import {
   ref,
   onMounted,
   watch,
+  computed,
   defineExpose,
   defineEmits,
+  defineProps,
 } from "vue";
 import {
   getCartList,
   removeCartItem,
+  removeCartItems,
   updateCartItemQuantity,
 } from "@/api/cart";
 import { Message } from "@arco-design/web-vue";
 import { debounce } from "lodash-es";
+import OrderConfirmationDrawer from "@/views/order/components/OrderConfirmationDrawer.vue";
 
 const cartData = reactive([]);
 const currentPage = ref(1);
-const pageSize = 10;
+let pageSize = 10;
 const totalCount = ref(0);
-const getTotalCount = () => totalCount.value;
 const hasReachedBottom = ref(false);
 const fetchCartDataLoading = ref(false);
+const changeItemLoading = ref(false);
 
 const selectProductId = reactive([]);
+
+const props = defineProps({
+  canChange: {
+    type: Boolean,
+    default: true,
+  },
+});
 
 const fetchCartData = async () => {
   fetchCartDataLoading.value = true;
@@ -134,7 +149,7 @@ const fetchCartData = async () => {
   );
   if (!hasReachedBottom.value) {
     cartData.push(...response.data);
-  } else {
+  } else if (pageSize > 0) {
     cartData.splice(
       (currentPage.value - 1) * pageSize,
       pageSize,
@@ -143,6 +158,7 @@ const fetchCartData = async () => {
   }
   Message.success({ content: "加载成功", id: "cart-data" });
   fetchCartDataLoading.value = false;
+
   if (cartData.length >= response.totalCount) {
     hasReachedBottom.value = true;
   } else {
@@ -150,6 +166,7 @@ const fetchCartData = async () => {
     currentPage.value++;
   }
   totalCount.value = response.totalCount;
+  calculateTotalPrice();
 };
 
 const removeItem = async (id) => {
@@ -160,17 +177,50 @@ const removeItem = async (id) => {
       content: res.message == null ? "删除成功" : res.message,
       id: "cart-data",
     });
-    const index = cartData.findIndex((item) => item.id === id);
-    if (index !== -1) {
-      cartData.splice(index, 1);
-      totalCount.value--;
-    }
+    // const index = cartData.findIndex((item) => item.id === id);
+    // if (index !== -1) {
+    //   cartData.splice(index, 1);
+    //   totalCount.value--;
+    // }
+    // 直接重新刷新购物车数据
+    refreshShoppingCartFromZero();
   } else {
     Message.error({
       content: res.message == null ? "删除失败" : res.message,
       id: "cart-data",
     });
   }
+};
+
+const removeSelectCartItem = async () => {
+  console.log(selectProductId);
+  if (selectProductId.length === 0) {
+    Message.warning({
+      content: "请先选择要删除的商品",
+    });
+    return;
+  }
+  Message.loading({ content: "删除中...", id: "cart-data" });
+  const res = await removeCartItems(selectProductId);
+  if (res.code === 200) {
+    Message.success({
+      content: res.message == null ? "删除成功" : res.message,
+      id: "cart-data",
+    });
+    refreshShoppingCartFromZero();
+  } else {
+    Message.error({
+      content: res.message == null ? "删除失败" : res.message,
+      id: "cart-data",
+    });
+  }
+};
+
+const refreshShoppingCartFromZero = () => {
+  cartData.splice(0, cartData.length);
+  currentPage.value = 1;
+  selectProductId.splice(0, selectProductId.length);
+  fetchCartData();
 };
 
 const updateQuantity = debounce(async (id, quantity) => {
@@ -196,18 +246,85 @@ const handleCheckChange = (id) => {
   }
 };
 
+const orderConfirmationDrawerRef = ref(null);
+const createSelectOrder = () => {
+  if (selectProductId.length === 0) {
+    Message.warning({
+      content: "请先选择要结算的商品",
+    });
+    return;
+  }
+  const selectItems = cartData.filter((item) =>
+    selectProductId.includes(item.id)
+  );
+  const selectProducts = selectItems.map((item) => {
+    return {
+      cartId: item.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      productName: item.name,
+      price: item.price,
+      model: item.model,
+      picture: item.cover,
+    };
+  });
+  orderConfirmationDrawerRef.value.showDrawer(
+    JSON.stringify(selectProducts),
+    "cartPart"
+  );
+};
+
+const totalPrice = ref(0);
+const calculateTotalPrice = () => {
+  totalPrice.value = cartData.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
+
+  console.log(totalPrice.value);
+};
+
+const createOrderAll = () => {
+  if (cartData.length === 0) {
+    Message.warning({
+      content: "购物车为空，无法结算",
+    });
+    return;
+  }
+  orderConfirmationDrawerRef.value.showDrawer(null, "cartAll");
+};
+
 onMounted(() => {
   fetchCartData();
+  // 如果不允许修改购物车，那么就是订单页面，那么就展示全部数据（不分页=每页数量设置为0）
+  if (!props.canChange) {
+    pageSize = 0;
+  }
 });
 
 watch(totalCount, (newCount) => {
   emit("updateTotalCount", newCount);
 });
+watch(selectProductId, (newSelectProductId) => {
+  emit("updateSelectProductId", newSelectProductId);
+});
+watch(changeItemLoading, (newChangeItemLoading) => {
+  emit("updateChangeItemLoading", newChangeItemLoading);
+});
+watch(totalPrice, (newTotalPrice) => {
+  emit("updateTotalPrice", newTotalPrice);
+});
 
-const emit = defineEmits(["updateTotalCount"]);
+const emit = defineEmits([
+  "updateTotalCount",
+  "updateSelectProductId",
+  "updateChangeItemLoading",
+  "updateTotalPrice",
+]);
 
 defineExpose({
-  getTotalCount,
+  removeSelectCartItem,
+  createOrderAll,
+  createSelectOrder,
 });
 </script>
 

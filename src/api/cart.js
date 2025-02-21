@@ -33,6 +33,21 @@ export const removeCartItem = (cartItemId) => {
     })
 }
 
+export const removeCartItems = (cartItemIds) => {
+    return request({
+        url: `${baseUrl}/deleteProducts`,
+        method: 'put',
+        data: cartItemIds
+    })
+}
+
+export const clearCart = () => {
+    return request({
+        url: `${baseUrl}/clearCart`,
+        method: 'put',
+    })
+}
+
 
 export const updateCartItemQuantity = (cartItemId, quantity) => {
     return request({
