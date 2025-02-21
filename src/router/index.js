@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import Layout from '@/layouts/Layout.vue'
+import { render } from 'vue'
 
 const routes = [
   {
@@ -10,35 +11,26 @@ const routes = [
   },
   {
     path: '/login',
-    name: 'Login',
-    component: Login
+    children: [{
+      path: '/login',
+      name: 'Login',
+      component: Login
+    }]
   },
   {
-    path: '/product',
+    path: '/musiMall',
     component: Layout,
     children: [
       {
         path: '/product',
         name: 'Product',
         component: () => import('@/views/product/product.vue')
-      }
-    ]
-  },
-  {
-    path: '/userCenter',
-    component: Layout,
-    children: [
+      },
       {
         path: '/user-center',
         name: 'UserCenter',
         component: () => import('@/views/user/userCenter.vue')
-      }
-    ]
-  },
-  {
-    path: '/order',
-    component: Layout,
-    children: [
+      },
       {
         path: '/order',
         name: 'Order',
@@ -50,7 +42,8 @@ const routes = [
         component: () => import('@/views/order/components/OrderDetail.vue')
       }
     ]
-  }
+  },
+
 ]
 
 const router = createRouter({

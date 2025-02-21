@@ -106,7 +106,7 @@ p {
 }
 
 .status-cancelled {
-  background: linear-gradient(90deg, #ff4b1f, #ff9068);
+  background: linear-gradient(90deg, #757f9a, #d7dde8);
 }
 
 .status-refunded {

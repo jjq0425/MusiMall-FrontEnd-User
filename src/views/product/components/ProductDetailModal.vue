@@ -95,6 +95,7 @@
         </div>
       </div>
     </div>
+    <OrderConfirmationDrawer ref="OrderConfirmationDrawerRef" />
   </a-modal>
 </template>
 
@@ -103,6 +104,7 @@ import { reactive, ref, defineExpose, computed } from "vue";
 import { getProductById } from "@/api/product";
 import { Message } from "@arco-design/web-vue";
 import SvgIcon from "@/components/SvgIcon.vue";
+import OrderConfirmationDrawer from "@/views/order/components/OrderConfirmationDrawer.vue";
 
 const visible = ref(false);
 const count = ref(1);
@@ -144,7 +146,21 @@ const addToCart = () => {
   Message.success("已加入购物车");
 };
 
-const makeOrderDirect = () => {};
+const OrderConfirmationDrawerRef = ref(null);
+const makeOrderDirect = () => {
+  visible.value = false;
+  const objStr = JSON.stringify([
+    {
+      productId: product.id,
+      productName: product.name,
+      price: product.price,
+      quantity: count.value,
+      model: product.model,
+      picture: product.picture,
+    },
+  ]);
+  OrderConfirmationDrawerRef.value.showDrawer(objStr);
+};
 
 const totalPrice = computed(() => {
   return (product.price * count.value).toFixed(2);

@@ -103,7 +103,9 @@
     </a-page-header>
 
     <main class="main">
-      <router-view />
+      <keep-alive>
+        <router-view />
+      </keep-alive>
     </main>
     <ApiConfigModal ref="apiConfigModalRef" />
     <!-- <footer class="footer">

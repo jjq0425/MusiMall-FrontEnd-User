@@ -38,3 +38,25 @@ export const getOrderDetailById = (id) => {
         }
     })
 }
+
+
+export const preCreateTradeId = () => {
+    return request({
+        url: `${baseUrl}/preCreateTradeId`,
+        method: 'get',
+    })
+}
+
+export const createByDirect = (id, deliveryAddressId, cartProducts, remark) => {
+    return request({
+        url: `${baseUrl}/createByDirect`,
+        method: 'post',
+        data: {
+            id: id,
+            deliveryAddressId: deliveryAddressId,
+            cartProducts: cartProducts,
+            remark: remark
+        }
+    })
+}
+

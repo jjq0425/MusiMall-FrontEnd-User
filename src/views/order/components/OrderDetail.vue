@@ -1,6 +1,19 @@
 <template>
   <div class="order-detail-page">
     <OrderHeader class="card" :orderStatus="order.orderStatus" />
+    <a-alert v-if="order.orderStatus === 1">
+      请在下单后的15分钟内完成支付，否则订单将自动取消。距离自动取消还有<a-countdown
+        format="mm:ss.SSS"
+        :value="orderTimeDate()"
+        :value-style="{
+          color: 'red',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          marginLeft: '5px',
+        }"
+        @finish="refreshOrderDetails"
+      />
+    </a-alert>
     <div class="order-info card">
       <h2>订单信息</h2>
       <a-divider />
@@ -45,54 +58,12 @@
       <h2>商品信息</h2>
       <a-divider />
       <a-alert type="normal">
-        仅代表下单时数据，与当前商品信息可能有不同。
+        仅代表下单时数据，与当前最新商品信息可能有差异或不同。
         <template #icon>
           <icon-exclamation-circle-fill />
         </template>
       </a-alert>
-      <a-list :data="order.tradeItemList">
-        <template #item="{ item }">
-          <a-list-item>
-            <a-list-item-meta>
-              <template #title>
-                <div style="font-size: 16px; font-weight: bold">
-                  {{ item.productName }}
-                  <span style="font-size: 16px; color: red; font-weight: bold"
-                    >￥{{ (item.price * item.quantity).toFixed(2) }}</span
-                  >
-                </div>
-              </template>
-              <template #description>
-                <a-descriptions
-                  column="3"
-                  size="small"
-                  style="margin-top: 10px; width: 55vh"
-                >
-                  <a-descriptions-item label="型号/描述" :span="3">{{
-                    item.model
-                  }}</a-descriptions-item>
-                  <a-descriptions-item label="单价"
-                    >￥{{ item.price.toFixed(2) }}</a-descriptions-item
-                  >
-                  <a-descriptions-item label="购买数量">{{
-                    item.quantity
-                  }}</a-descriptions-item>
-                </a-descriptions>
-              </template>
-            </a-list-item-meta>
-            <template #extra>
-              <div class="trade-item-picture">
-                <a-image
-                  :src="item.picture"
-                  :alt="item.productName"
-                  width="110px"
-                  height="110px"
-                />
-              </div>
-            </template>
-          </a-list-item>
-        </template>
-      </a-list>
+      <TradeList :tradeItems="order.tradeItemList" />
     </div>
     <div class="payment-info card">
       <h2>支付信息</h2>
@@ -126,6 +97,7 @@ import { Message } from "@arco-design/web-vue";
 import dayjs from "dayjs";
 import OrderStatusTag from "./OrderStatusTag.vue";
 import OrderHeader from "./OrderHeader.vue";
+import TradeList from "./TradeList.vue";
 import router from "@/router";
 import { useUserStore } from "@/store/user";
 
@@ -163,6 +135,9 @@ const address = reactive({
 });
 
 const fetchOrderDetails = async () => {
+  // 设置滚动条位置
+  window.scrollTo(0, 0);
+  // 加载中
   Message.loading({ content: "加载中...", id: "order-detail" });
   try {
     const orderRes = await getOrderDetailById(orderId);
@@ -178,7 +153,6 @@ const fetchOrderDetails = async () => {
   } catch (error) {
     Message.error({ content: "获取订单详情失败", id: "order-detail" });
   } finally {
-    Message.destroy("order-detail");
   }
 };
 
@@ -217,6 +191,19 @@ const payStatusText = computed(() => {
       return "未知状态";
   }
 });
+
+const orderTimeDate = () => {
+  // 将order.orderTime转为Date
+  // return Date.now() + 0.1 * 60 * 1000;
+  return order.orderTime + 15 * 60 * 1000;
+};
+
+const refreshOrderDetails = () => {
+  Message.info({ content: "超时未支付，订单即将取消...", duration: 4000 });
+  setTimeout(() => {
+    fetchOrderDetails();
+  }, 3500);
+};
 
 onMounted(() => {
   fetchOrderDetails();
