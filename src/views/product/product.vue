@@ -1,5 +1,9 @@
 <template>
   <div>
+    <!-- AI卡片 -->
+    <div class="ai-card">
+      <aiCard></aiCard>
+    </div>
     <!-- 商品搜索 -->
     <div class="search">
       <div class="title">
@@ -64,10 +68,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, nextTick } from "vue";
 import ProductList from "@/views/product/components/ProductList.vue";
 import { getProductList, searchProduct } from "@/api/product";
 import { Message } from "@arco-design/web-vue";
+import aiCard from "@/views/ai/components/aiCard.vue";
 
 const searchValue = ref("");
 const productListloading = ref(false);
@@ -194,6 +199,14 @@ const handlePageSizeChange = (pageSize_) => {
 .pagination-div {
   position: absolute;
   bottom: 36px;
-  right: 36px;
+  left: 36px;
+}
+
+.ai-card {
+  /* 浮动于页面右侧 */
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
 }
 </style>

@@ -11,6 +11,7 @@ import { Message } from '@arco-design/web-vue';
 import 'virtual:svg-icons-register'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import 'animate.css';
 
 
 

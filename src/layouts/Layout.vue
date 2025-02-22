@@ -104,7 +104,7 @@
 
     <main class="main">
       <keep-alive>
-        <router-view />
+        <router-view class="animate__animated animate__fadeIn" />
       </keep-alive>
     </main>
     <ApiConfigModal ref="apiConfigModalRef" />
