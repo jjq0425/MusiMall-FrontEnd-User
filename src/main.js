@@ -9,6 +9,8 @@ import '@arco-design/web-vue/dist/arco.css'
 import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import { Message } from '@arco-design/web-vue';
 import 'virtual:svg-icons-register'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 
 
