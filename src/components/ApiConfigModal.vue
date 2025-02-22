@@ -26,14 +26,12 @@
           </template>
         </a-table>
       </a-form-item>
+      <a-form-item label="AI服务使用测试环境（测试环境仅会输出固定句式）">
+        <a-switch v-model="formData.isAiTest" />
+      </a-form-item>
     </a-form>
     <a-alert
       title="强烈建议使用【网关】环境，非网关环境没有统一响应体，前端可能解析失败！前端测试均使用【网关】环境，不保证非网关环境的适配性。"
-      type="warning"
-      show-icon
-    />
-    <a-alert
-      title="请务必拉取最新的gateway代码，否则若存在多个实例，有可能导致请求负载均衡时走向其他人（非你的机器上运行）的实例，导致请求失败！"
       type="warning"
       show-icon
     />
@@ -54,6 +52,7 @@ const formData = reactive({
   withGateWay: true,
   baseUrlWithGateWay: "",
   baseUrlWithoutGateWay: [],
+  isAiTest: null,
 });
 
 const buildTimestampShow = buildTimestamp;
@@ -65,6 +64,9 @@ const show = () => {
   );
   formData.withGateWay = apiStore.withGateWay;
   formData.baseUrlWithGateWay = apiStore.baseUrlWithGateWay;
+  formData.isAiTest =
+    localStorage.getItem("aiTest") === "true" ||
+    localStorage.getItem("aiTest") === null;
   visible.value = true;
 };
 
@@ -72,6 +74,12 @@ const handleOk = () => {
   apiStore.setWithGateWay(formData.withGateWay);
   if (formData.withGateWay) {
     apiStore.setBaseUrlWithGateWay(formData.baseUrlWithGateWay);
+  }
+  console.log(formData.isAiTest);
+  if (formData.isAiTest) {
+    localStorage.setItem("aiTest", "true");
+  } else {
+    localStorage.setItem("aiTest", "false");
   }
   Message.success("保存成功");
   visible.value = false;

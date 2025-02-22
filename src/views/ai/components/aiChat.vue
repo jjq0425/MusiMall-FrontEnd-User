@@ -9,6 +9,7 @@
     :modal-style="{
       background: 'url(' + aiBg + ')',
       backgroundPosition: 'center',
+      borderRadius: '10px',
     }"
     :maskClosable="false"
   >
@@ -23,8 +24,15 @@
       id="AImsgbox"
     >
       <div>
+        <a-alert
+          title="当前为测试模式，仅供开发人员使用，不实际调用大模型。如需修改请关闭弹窗后点右上角wifi符号"
+          style="margin-bottom: 20px; scale: 0.75"
+          type="info"
+          show-icon
+          v-if="isTest"
+        />
         <!-- 正常对话 -->
-        <div v-for="(item, index) in msgList_Liushi" :key="index">
+        <div v-for="(item, index) in msgList_Stream" :key="index">
           <!-- AI回答 -->
           <transition
             enter-active-class="animate__animated animate__fadeIn animate__animated animate__faster"
@@ -55,8 +63,8 @@
                   <span
                     class="cursor"
                     v-if="
-                      index == msgList_Liushi.length - 1 &&
-                      noSend == true &&
+                      index == msgList_Stream.length - 1 &&
+                      forbiddenSend == true &&
                       showLoadMsg == false
                     "
                   ></span>
@@ -65,8 +73,9 @@
                   class="toOrderBtn animate__animated animate__fadeIn animate__faster"
                   v-if="
                     hasOrder(item.msg) != null &&
-                    (noSend == false ||
-                      (noSend == true && index != msgList_Liushi.length - 1))
+                    (forbiddenSend == false ||
+                      (forbiddenSend == true &&
+                        index != msgList_Stream.length - 1))
                   "
                   @click="routeToOrder(hasOrder(item.msg))"
                 >
@@ -130,20 +139,20 @@
       <a-textarea
         class="inputArea"
         :placeholder="
-          noSend
+          forbiddenSend
             ? 'AI导购正在思考或执行任务...'
             : '请输入你的需求，AI导购将为您解答或提供帮助。'
         "
         :auto-size="{ minRows: 3, maxRows: 5 }"
-        v-model="nowMsg"
-        :disabled="noSend || !canUse"
+        v-model="inputTextareaMsg"
+        :disabled="forbiddenSend || !canUse"
       ></a-textarea>
       <a-button
         class="btn"
-        :disabled="noSend || !canUse"
+        :disabled="forbiddenSend || !canUse"
         :max="100"
         shape="round"
-        @click="sendMsg"
+        @click="sendMsgPrepare"
         >发送</a-button
       >
     </div>
@@ -162,20 +171,18 @@ import {
 import SvgIcon from "@/components/SvgIcon.vue";
 // 响应式数据
 const visible = ref(false);
-const msgList = ref([]);
-const msgList_Liushi = ref([]);
-const noSend = ref(false);
-const showLoadMsg = ref(false);
-const nowMsg = ref("");
-const respondComplete = ref(true);
-const initMsg = ref(false);
+const msgList = ref([]); // 消息集
+const msgList_Stream = ref([]); // 流式输出已经输出的响应集
+const forbiddenSend = ref(false); // 是否禁止发送消息
+const showLoadMsg = ref(false); // 是否显示加载图标，用于用户点击发送后，到链接成功之间的时间段
+const inputTextareaMsg = ref(""); // 输入框内容
+const respondComplete = ref(true); // 是否已经回复完成
+const initMsg = ref(false); // 是否是初始化消息
+const chatId = ref(null); // 聊天id
 
 // 配置
-const canUse = ref(true);
-
-const ttsWS = ref(null);
+const canUse = ref(true); // 是否可以使用
 const willsendMsg = ref("");
-const template = ref("");
 
 // 图片
 const userAvatar = ref(
@@ -187,6 +194,10 @@ const aiAvatar = ref(
 
 const aiBg = ref(new URL("@/assets/pic/aiBg.png", import.meta.url).href);
 
+/**
+ *  判断消息中是否有订单号
+ * @param msg  消息
+ */
 const hasOrder = (msg) => {
   // 如果出现“订单号为12189381830则提取并返回订单号，否则返回null
   let reg = /订单号为(\d+)/;
@@ -197,8 +208,10 @@ const hasOrder = (msg) => {
     return null;
   }
 };
-// 发送无使用消息
-const sendNouse = () => {
+/**
+ * 获取测试消息
+ */
+const getTestMsgInLocal = () => {
   setTimeout(() => {
     if (visible.value) {
       msgList.value.push({
@@ -207,12 +220,12 @@ const sendNouse = () => {
       });
       respondComplete.value = false;
       initMsg.value = true;
-      noSend.value = true;
+      forbiddenSend.value = true;
       showLoadMsg.value = false;
       respondComplete.value = true;
 
       if (!visible.value) return;
-      msgList_Liushi.value.push({
+      msgList_Stream.value.push({
         my: false,
         msg: "",
       });
@@ -221,10 +234,10 @@ const sendNouse = () => {
       let timer = setInterval(() => {
         if (visible.value) {
           if (
-            index < msgList.value[msgList_Liushi.value.length - 1].msg.length
+            index < msgList.value[msgList_Stream.value.length - 1].msg.length
           ) {
-            msgList_Liushi.value[msgList_Liushi.value.length - 1].msg +=
-              msgList.value[msgList_Liushi.value.length - 1].msg.charAt(index);
+            msgList_Stream.value[msgList_Stream.value.length - 1].msg +=
+              msgList.value[msgList_Stream.value.length - 1].msg.charAt(index);
             index++;
           } else if (!respondComplete.value) {
           } else {
@@ -242,43 +255,38 @@ const sendNouse = () => {
   }, 10);
 };
 
-// 打开组件
-const open = (msgInit = "") => {
-  noSend.value = false;
-  msgList.value = [];
-  msgList_Liushi.value = [];
-  visible.value = true;
-  nowMsg.value = msgInit;
-
-  setTimeout(() => {
-    msgList.value = [];
-    msgList_Liushi.value = [];
-    init();
-  }, 0);
-};
-
-// 流失输出
-const liushishuchu = () => {
+/**
+ * 流式输出
+ */
+const StreamLickOut = () => {
+  // 如果窗口已经关闭，则不执行
   if (!visible.value) return;
-  msgList_Liushi.value.push({
+  // 如果当前没有消息，则不执行
+  msgList_Stream.value.push({
     my: false,
     msg: "",
   });
 
-  let index = 0;
+  // 流式输出
+  let index = 0; // 当前输出的字符索引
   let timer = setInterval(() => {
+    // 如果窗口已经关闭，则不执行
     if (visible.value) {
-      if (index < msgList.value[msgList_Liushi.value.length - 1].msg.length) {
-        msgList_Liushi.value[msgList_Liushi.value.length - 1].msg +=
-          msgList.value[msgList_Liushi.value.length - 1].msg.charAt(index);
+      // 如果当前消息还没有输出完毕
+      if (index < msgList.value[msgList_Stream.value.length - 1].msg.length) {
+        // 将[当前字符]添加到流式输出的消息中
+        msgList_Stream.value[msgList_Stream.value.length - 1].msg +=
+          msgList.value[msgList_Stream.value.length - 1].msg.charAt(index);
         index++;
       } else if (!respondComplete.value) {
+        // 如果当前消息已经输出完毕，但是还没有收到结束的回复，则不执行，继续等待
       } else {
+        // 如果当前消息已经输出完毕，并且已经收到结束的回复，则清除定时器
         clearInterval(timer);
         timer = null;
         if (visible.value) {
           if (!canUse.value) {
-            sendNouse();
+            getTestMsgInLocal();
           }
           noSendOver();
         }
@@ -286,10 +294,13 @@ const liushishuchu = () => {
     } else {
       clearInterval(timer);
     }
+    // 每20毫秒输出一个字符
   }, 20);
 };
 
-// 初始化
+/**
+ * 初始化
+ */
 const init = () => {
   msgList.value.push({
     my: false,
@@ -297,25 +308,49 @@ const init = () => {
   });
 
   initMsg.value = true;
-  noSend.value = true;
+  forbiddenSend.value = true;
   showLoadMsg.value = false;
-  liushishuchu();
+  StreamLickOut();
 };
 
-// 关闭组件
-const close = () => {
-  console.log("close");
+/**
+ * 打开窗口组件
+ * @param {string} msgInit 初始化消息（加载到底部输入框）
+ */
+const open = (msgInit = "") => {
+  // 初始化
+  forbiddenSend.value = false; // 显示加载图标
   msgList.value = [];
-  msgList_Liushi.value = [];
-  visible.value = false;
-  noSend.value = false;
+  msgList_Stream.value = [];
+  visible.value = true;
+  inputTextareaMsg.value = msgInit;
+  calculateIsTest(); // 判断是否是测试
+  chatId.value = null;
+
+  setTimeout(() => {
+    msgList.value = [];
+    msgList_Stream.value = [];
+    init();
+  }, 0);
 };
 
-// 正在发送中
-const noSending = () => {
-  if (!noSend.value) {
+/**
+ * 关闭窗口组件
+ */
+const close = () => {
+  msgList.value = [];
+  msgList_Stream.value = [];
+  visible.value = false;
+  forbiddenSend.value = false;
+};
+
+/**
+ * 设置不能发送消息
+ */
+const setNoSending = () => {
+  if (!forbiddenSend.value) {
     setTimeout(() => {
-      noSend.value = true;
+      forbiddenSend.value = true;
       showLoadMsg.value = true;
     }, 100);
     setTimeout(() => {
@@ -324,13 +359,15 @@ const noSending = () => {
       }
     }, 610);
   } else {
-    console.log("请等待当前对话完成");
+    // Message.warning("请等待当前对话完成");
   }
 };
 
-// 发送完成
+/**
+ * 设置可以发送消息
+ */
 const noSendOver = () => {
-  noSend.value = false;
+  forbiddenSend.value = false;
   showLoadMsg.value = false;
   setTimeout(() => {
     if (visible.value) {
@@ -340,7 +377,9 @@ const noSendOver = () => {
   initMsg.value = false;
 };
 
-// 调整盒子高度
+/**
+ * 调整消息框高度
+ */
 const boxHeightAdjust = () => {
   const box = document.getElementById("AImsgbox");
   if (box) {
@@ -352,121 +391,110 @@ const boxHeightAdjust = () => {
   }
 };
 
-// 发送消息
-const sendMsg = () => {
-  if (nowMsg.value === "") {
-    console.log("不能发送空字符串");
+/**
+ * 发送消息准备
+ */
+const sendMsgPrepare = () => {
+  // 检验是否为空
+  if (inputTextareaMsg.value.trim() === "") {
+    Message.warning("请输入内容");
+    inputTextareaMsg.value = "";
     return;
   }
   boxHeightAdjust();
-  noSending();
+  setNoSending();
+  // 添加用户端消息
   msgList.value.push({
     my: true,
-    msg: nowMsg.value,
+    msg: inputTextareaMsg.value,
   });
-  msgList_Liushi.value.push({
+  msgList_Stream.value.push({
     my: true,
-    msg: nowMsg.value,
+    msg: inputTextareaMsg.value,
   });
-  willsendMsg.value = nowMsg.value;
-  nowMsg.value = "";
+  // willsendMsg存储将发送消息，然后将inputTextareaMsg清空，清空用户最下方输入回显
+  willsendMsg.value = inputTextareaMsg.value;
+  inputTextareaMsg.value = "";
 
-  noSending();
+  setNoSending();
   setTimeout(() => {
-    sendNouse();
+    // getTestMsgInLocal();
+    sendMsgNow();
   }, 1000);
 };
 
-// 发送 WebSocket 消息
-const webSocketSend = () => {
-  let textArrySend = [];
-  textArrySend.push({
-    role: "user",
-    content: template.value + willsendMsg.value,
-  });
-  const params = {
-    header: {
-      app_id: appId.value,
-      uid: "fd3f47e4-d",
-    },
-    parameter: {
-      chat: {
-        domain: "general",
-        temperature: 0.5,
-        max_tokens: 1024,
-      },
-    },
-    payload: {
-      message: {
-        text: textArrySend,
-      },
-    },
-  };
-  willsendMsg.value = "";
-  ttsWS.value.send(JSON.stringify(params));
-  console.log(">模型准备发送数据", params);
-};
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { aichat } from "@/api/ai";
+import { Message } from "@arco-design/web-vue";
+import { useApiStore } from "../../../store/api";
+const apiStore = useApiStore();
 
-// 发送过程中
-const inSendingProcess = () => {
-  getWebsocketUrl().then((url) => {
-    let ttsWSInstance;
-    if ("WebSocket" in window) {
-      ttsWSInstance = new WebSocket(url);
-    } else if ("MozWebSocket" in window) {
-      ttsWSInstance = new MozWebSocket(url);
-    } else {
-      alert("浏览器不支持WebSocket");
-      return;
-    }
-    ttsWS.value = ttsWSInstance;
-
-    ttsWSInstance.onopen = (e) => {
-      webSocketSend();
+/**
+ * 发送消息
+ */
+const sendMsgNow = () => {
+  apiStore.setInlocalStorage();
+  // 发送消息
+  fetchEventSource(aichat(isTest.value), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userMessage: willsendMsg.value,
+      chatId: chatId.value,
+    }),
+    onopen(event) {
+      // 链接成功
       respondComplete.value = false;
       showLoadMsg.value = false;
       msgList.value.push({
         my: false,
         msg: "",
       });
-      liushishuchu();
-    };
-
-    ttsWSInstance.onmessage = (e) => {
-      let result = JSON.parse(e.data);
-      let dataArray = result.payload.choices.text;
-      console.log(dataArray);
-      msgList.value[msgList.value.length - 1].msg += dataArray[0].content;
-
-      let jsonData = JSON.parse(e.data);
-      if (jsonData.header.code !== 0) {
-        console.log("大模型调用失败，星火服务器原因");
+      StreamLickOut();
+    },
+    onmessage(event) {
+      let result = JSON.parse(event.data);
+      // 如果返回的数据为空，则提示模型出现问题
+      if (result == null) {
+        msgList.value[msgList.value.length - 1].msg =
+          "模型出现问题，请稍后再试";
         showLoadMsg.value = false;
-        noSend.value = false;
-        ttsWSInstance.close();
+        forbiddenSend.value = false;
+        msg;
+        Message.warning("模型出现问题，请稍后再试");
         return;
       }
-      if (jsonData.header.code === 0 && jsonData.header.status === 2) {
-        respondComplete.value = true;
-        ttsWSInstance.close();
+      // 如果返回的数据中有chatId，则更新chatId
+      if (result.chatId != null) {
+        chatId.value = result.chatId;
       }
-    };
-
-    ttsWSInstance.onerror = (e) => {
-      console.log("大模型调用失败，星火服务器原因！");
-      showLoadMsg.value = false;
-      noSend.value = false;
+      // 如果返回的数据中有message，则将message添加到当前消息中
+      if (result.message != null) {
+        msgList.value[msgList.value.length - 1].msg += result.message;
+      }
+    },
+    onclose(event) {
+      // 链接关闭
       respondComplete.value = true;
-      console.error(`详情查看：${encodeURI(url.replace("wss:", "https:"))}`);
-    };
-
-    ttsWSInstance.onclose = (e) => {
-      console.log(e);
-    };
+    },
+    onerror(event) {
+      // 链接错误
+      msgList.value[msgList.value.length - 1].msg = "模型出现问题，请稍后再试";
+      showLoadMsg.value = false;
+      forbiddenSend.value = false;
+      msg;
+      Message.warning("模型出现问题，请稍后再试");
+    },
   });
 };
 
 import router from "@/router";
+/**
+ * 跳转到订单页面
+ * @param orderId 订单号
+ */
 const routeToOrder = (orderId) => {
   setTimeout(() => {
     if (orderId == null) {
@@ -478,6 +506,19 @@ const routeToOrder = (orderId) => {
       close();
     }, 1000);
   }, 100);
+};
+
+const isTest = ref(false); // 是否是测试模式
+
+const calculateIsTest = () => {
+  if (
+    localStorage.getItem("aiTest") == "true" ||
+    localStorage.getItem("aiTest") == null
+  ) {
+    isTest.value = true;
+  } else if (localStorage.getItem("aiTest") == "false") {
+    isTest.value = false;
+  }
 };
 
 onMounted(() => {
@@ -518,7 +559,10 @@ defineExpose({
   0% {
     opacity: 0;
   }
-  50% {
+  20% {
+    opacity: 1;
+  }
+  70% {
     opacity: 1;
   }
   100% {

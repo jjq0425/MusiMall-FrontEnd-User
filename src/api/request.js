@@ -15,7 +15,14 @@ const request = axios.create({
             return jsonBig.parse(data);
         } catch (err) {
             // 如果转换失败，代表没有长数字可转，正常解析并返回
-            return JSON.parse(data)
+
+            try {
+                return JSON.parse(data)
+            } catch (err) {
+                // 如果是流式数据，直接返回
+                return data
+            }
+
         }
     }]
 
@@ -40,7 +47,10 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
     response => {
-
+        // 如果是流式数据。直接返回
+        if (response.headers['content-type'] === 'text/event-stream') {
+            return response
+        }
         // 如果不需要剥离外层的response（统一响应），直接返回
         if (!NeedOuterResponsePrase()) {
             return response.data
@@ -51,7 +61,7 @@ request.interceptors.response.use(
                 Message.warning(response?.data?.message)
                 if (response?.data?.message == "请先登录") {
                     localStorage.removeItem('token')
-                    router.push({name: 'Login'})
+                    router.push({ name: 'Login' })
                 }
             }
             return Promise.reject(response)
@@ -75,6 +85,8 @@ request.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
+
 
 
 
