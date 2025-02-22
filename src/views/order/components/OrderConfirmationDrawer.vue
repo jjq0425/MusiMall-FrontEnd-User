@@ -12,83 +12,87 @@
       zIndex: 9990,
     }"
   >
-    <div class="order-confirmation">
-      <div class="card">
-        <h2 style="margin-bottom: 10px">收货地址</h2>
+    <div>
+      <div>
+        <div class="order-confirmation">
+          <div class="card">
+            <h2 style="margin-bottom: 10px">收货地址</h2>
 
-        <OrderAddressChoosedCard
-          ref="orderAddressChoosedCardRef"
-          @changeAddress="changeAddress"
+            <OrderAddressChoosedCard
+              ref="orderAddressChoosedCardRef"
+              @changeAddress="changeAddress"
+            />
+          </div>
+
+          <div class="card">
+            <h2 style="margin-bottom: 10px">商品列表</h2>
+            <a-alert type="normal">
+              请确认订单信息，价格以订单支付详情页展示为准。
+              <span style="font-weight: bold" v-if="showType == 'cartAll'"
+                >请注意当前为结算购物车<span style="color: red">全部商品</span
+                >。结算后将清空购物车。
+              </span>
+              <span v-if="showType == 'cartPart'"
+                >结算后将从购物车中移除所购商品</span
+              >
+              <template #icon>
+                <icon-exclamation-circle-fill />
+              </template>
+            </a-alert>
+            <TradeList :tradeItems="products" v-if="showType != 'cartAll'" />
+            <CartProductList
+              :canChange="false"
+              @updateTotalPrice="updateTotalPrice"
+              v-else
+            />
+          </div>
+          <a-divider />
+          <div class="card">
+            <h3>备注信息</h3>
+            <a-textarea v-model="remark" placeholder="填写备注信息" />
+          </div>
+          <div class="card">
+            <a-alert type="normal">
+              实际应付金额以订单支付详情页展示为准。
+              <template #icon>
+                <icon-exclamation-circle-fill />
+              </template>
+            </a-alert>
+          </div>
+          <div style="min-height: 50px"></div>
+        </div>
+        <AddressChooseModal
+          ref="addressChooseModalRef"
+          @choose="chooseNewAddress"
         />
-      </div>
+        <div class="floating-footer">
+          <div class="total-price">
+            <a-statistic
+              title="总金额（仅供参考）"
+              :value="totalPrice"
+              :precision="2"
+              :value-from="0"
+              :start="true"
+              animation
+            >
+              <template #prefix> ￥ </template>
+            </a-statistic>
+          </div>
+          <div class="button-group">
+            <a-button
+              @click="cancelOrder"
+              type="text"
+              style="margin-right: 20px; color: grey"
+              >取消</a-button
+            >
+            <div class="purchase-btn" @click="comfirmOrder">
+              <span style="color: white; font-weight: bold; font-size: 15px">
+                <!-- <icon-plus-circle /> -->
 
-      <div class="card">
-        <h2 style="margin-bottom: 10px">商品列表</h2>
-        <a-alert type="normal">
-          请确认订单信息，价格以订单支付详情页展示为准。
-          <span style="font-weight: bold" v-if="showType == 'cartAll'"
-            >请注意当前为结算购物车<span style="color: red">全部商品</span
-            >。结算后将清空购物车。
-          </span>
-          <span v-if="showType == 'cartPart'"
-            >结算后将从购物车中移除所购商品</span
-          >
-          <template #icon>
-            <icon-exclamation-circle-fill />
-          </template>
-        </a-alert>
-        <TradeList :tradeItems="products" v-if="showType != 'cartAll'" />
-        <CartProductList
-          :canChange="false"
-          @updateTotalPrice="updateTotalPrice"
-          v-else
-        />
-      </div>
-      <a-divider />
-      <div class="card">
-        <h3>备注信息</h3>
-        <a-textarea v-model="remark" placeholder="填写备注信息" />
-      </div>
-      <div class="card">
-        <a-alert type="normal">
-          实际应付金额以订单支付详情页展示为准。
-          <template #icon>
-            <icon-exclamation-circle-fill />
-          </template>
-        </a-alert>
-      </div>
-      <div style="min-height: 50px"></div>
-    </div>
-    <AddressChooseModal
-      ref="addressChooseModalRef"
-      @choose="chooseNewAddress"
-    />
-    <div class="floating-footer">
-      <div class="total-price">
-        <a-statistic
-          title="总金额（仅供参考）"
-          :value="totalPrice"
-          :precision="2"
-          :value-from="0"
-          :start="true"
-          animation
-        >
-          <template #prefix> ￥ </template>
-        </a-statistic>
-      </div>
-      <div class="button-group">
-        <a-button
-          @click="cancelOrder"
-          type="text"
-          style="margin-right: 20px; color: grey"
-          >取消</a-button
-        >
-        <div class="purchase-btn" @click="comfirmOrder">
-          <span style="color: white; font-weight: bold; font-size: 15px">
-            <!-- <icon-plus-circle /> -->
-
-            确认并结算
-          </span>
+                确认并结算
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -35,15 +35,18 @@
         为您服务
       </div>
     </div>
+    <aiChat ref="aiChatRef"></aiChat>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import aiLottie from "./aiLottie.vue";
+import aiChat from "./aiChat.vue";
 
+const aiChatRef = ref(null);
 const openAiChat = () => {
-  console.log("AI Chat");
+  aiChatRef.value.open();
 };
 
 onMounted(() => {
@@ -53,10 +56,10 @@ onMounted(() => {
 
 <style scoped>
 .aiCard {
-  transform: scale(0.75);
+  transform: scale(0.6);
   transition: all 0.3s ease-in-out;
 }
 .aiCard:hover {
-  transform: translate3d(0, -5px, -20px) scale(0.95);
+  transform: translate3d(0, -5px, -20px) scale(0.75);
 }
 </style>

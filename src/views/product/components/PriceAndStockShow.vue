@@ -13,8 +13,9 @@
       <span style="color: #f76707" v-if="isStockApprochOut"
         >库存告急，仅剩{{ remainQuantity }}件</span
       >
-      <span v-else-if="isNewStock">新品上架，欢迎选购</span>
+
       <span v-else-if="isStockOut">商品已售罄，关注其他商品吧</span>
+      <span v-else-if="isNewStock">新品上架，欢迎选购</span>
       <span v-else
         >已售：{{ totalQuantity - remainQuantity }} 库存:
         {{ remainQuantity }}</span
