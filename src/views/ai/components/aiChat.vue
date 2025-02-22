@@ -49,16 +49,30 @@
                 :flex="100"
                 class="left-sanjiao"
               >
-                <span v-html="item.msg"> </span>
+                <div>
+                  <span v-html="item.msg"> </span>
 
-                <span
-                  class="cursor"
+                  <span
+                    class="cursor"
+                    v-if="
+                      index == msgList_Liushi.length - 1 &&
+                      noSend == true &&
+                      showLoadMsg == false
+                    "
+                  ></span>
+                </div>
+                <div
+                  class="toOrderBtn animate__animated animate__fadeIn animate__faster"
                   v-if="
-                    index == msgList_Liushi.length - 1 &&
-                    noSend == true &&
-                    showLoadMsg == false
+                    hasOrder(item.msg) != null &&
+                    (noSend == false ||
+                      (noSend == true && index != msgList_Liushi.length - 1))
                   "
-                ></span>
+                  @click="routeToOrder(hasOrder(item.msg))"
+                >
+                  <div>点击此处，查看订单: {{ hasOrder(item.msg) }}</div>
+                  <SvgIcon name="jumpTo" width="18px" />
+                </div>
               </div>
             </a-row>
           </transition>
@@ -145,7 +159,7 @@ import {
   watch,
   defineExpose,
 } from "vue";
-
+import SvgIcon from "@/components/SvgIcon.vue";
 // 响应式数据
 const visible = ref(false);
 const msgList = ref([]);
@@ -173,13 +187,23 @@ const aiAvatar = ref(
 
 const aiBg = ref(new URL("@/assets/pic/aiBg.png", import.meta.url).href);
 
+const hasOrder = (msg) => {
+  // 如果出现“订单号为12189381830则提取并返回订单号，否则返回null
+  let reg = /订单号为(\d+)/;
+  let result = reg.exec(msg);
+  if (result) {
+    return result[1];
+  } else {
+    return null;
+  }
+};
 // 发送无使用消息
 const sendNouse = () => {
   setTimeout(() => {
     if (visible.value) {
       msgList.value.push({
         my: false,
-        msg: "🔔实现碳中和对发电企业来说，主要挑战包括技术成本、技术难题、系统整合以及经济社会部门联动等。具体如下：<ul><li> <b>1. 技术成本：</b>碳中和技术目前的成本相对较高，这限制了其大规模应用的可能性。为了实现碳中和目标，需要通过技术进步和规模化生产来降低成本。</li><li> <b>2. 捕获难题：</b>碳捕获和封存技术（CCS）是实现碳中和的关键技术之一，但目前还存在一些技术难题，需要加强研究和开发以克服这些难题。</li><li> <b>3. 系统整合：</b>智能电网的建设是实现碳中和的重要环节，但涉及到技术的整合和系统安全问题，需要解决这些技术挑战以保证电网的稳定和安全。</li><li> <b>4. 经济社会部门联动：</b>碳中和目标的实现是一个涉及经济社会各部门联动的长期系统性问题。电力行业作为能源系统最大的碳排放部门，其变革将影响到整个能源和经济体系。</li></ul>综上所述，发电企业在迈向碳中和的过程中，不仅需要关注技术和成本的挑战，还需要考虑到整个经济社会系统的变革。",
+        msg: "🔔实现碳中和对发电企业来说，主要挑战包括技术成本、技术难题、系统整合以及经济社会部门联动等。具体如下：<ul><li> <b>1. 技术成本：</b>碳中和技术目前的成本相对较高，这限制了其大规模应用的可能性。为了实现碳中和目标，需要通过技术进步和规模化生产来降低成本。</li><li> <b>2. 捕获难题：</b>碳捕获和封存技术（CCS）是实现碳中和的关键技术之一，但目前还存在一些技术难题，需要加强研究和开发以克服这些难题。</li><li> <b>3. 系统整合：</b>智能电网的建设是实现碳中和的重要环节，但涉及到技术的整合和系统安全问题，需要解决这些技术挑战以保证电网的稳定和安全。</li><li> <b>4. 经济社会部门联动：</b>碳中和目标的实现是一个涉及经济社会各部门联动的长期系统性问题。电力行业作为能源系统最大的碳排放部门，其变革将影响到整个能源和经济体系。</li></ul>综上所述，发电企业在迈向碳中和的过程中，不仅需要关注技术和成本的挑战，还需要考虑到整个经济社会系统的变革。我已经为您成功下单，订单号为12189381830，您可以点击下方按钮跳转查看并完成支付或取消。感谢光临MusiMall，祝您购物愉快！",
       });
       respondComplete.value = false;
       initMsg.value = true;
@@ -442,6 +466,20 @@ const inSendingProcess = () => {
   });
 };
 
+import router from "@/router";
+const routeToOrder = (orderId) => {
+  setTimeout(() => {
+    if (orderId == null) {
+      router.push({ name: "Order" });
+    } else {
+      router.push({ name: "Order-Detail", params: { id: orderId } });
+    }
+    setTimeout(() => {
+      close();
+    }, 1000);
+  }, 100);
+};
+
 onMounted(() => {
   // 可以在这里添加挂载后的逻辑
 });
@@ -508,5 +546,25 @@ defineExpose({
   right: 30px;
   bottom: 40px;
   cursor: not-allowed;
+}
+
+.toOrderBtn {
+  text-align: left;
+  margin-top: 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: linear-gradient(275deg, #ce9ffc, #7367f0);
+  color: white;
+
+  padding: 5px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.toOrderBtn:hover {
+  padding: 5px 55px;
 }
 </style>
