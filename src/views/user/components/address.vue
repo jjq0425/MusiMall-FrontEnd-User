@@ -8,7 +8,7 @@
     >
 
     <div class="address-list">
-      <a-empty v-if="addresses.length === 0"
+      <a-empty v-if="addresses.length === 0 && !addressListloading"
         >暂无地址信息，点击左上角添加</a-empty
       >
       <a-empty v-else-if="addressListloading">
