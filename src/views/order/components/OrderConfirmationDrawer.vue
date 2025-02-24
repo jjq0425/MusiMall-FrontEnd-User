@@ -88,6 +88,7 @@
             <div class="purchase-btn" @click="comfirmOrder">
               <span style="color: white; font-weight: bold; font-size: 15px">
                 <!-- <icon-plus-circle /> -->
+                <icon-loading v-if="createOrderloading" />
 
                 确认并结算
               </span>

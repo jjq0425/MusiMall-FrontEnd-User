@@ -32,3 +32,10 @@ export const searchProduct = (keyword, page, pageSize) => {
 export const getProductById = (id) => {
     return request.get(`${baseUrl}/product/${id}`)
 }
+
+export const SyncProduct = () => {
+    return request({
+        url: `${baseUrl}/inventorySync/syncAll`,
+        method: 'post',
+    })
+}

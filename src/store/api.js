@@ -29,7 +29,8 @@ export const useApiStore = defineStore('api', {
                 title: 'coin',
                 url: 'https://coin.example.com'
             }
-        ]
+        ],
+        payUrl: 'http://124.221.142.75:50010'
     }),
     actions: {
         setWithGateWay(value) {
@@ -49,6 +50,10 @@ export const useApiStore = defineStore('api', {
         },
         setInlocalStorage() {
             localStorage.setItem('api', JSON.stringify(this.$state));
+        },
+        setPayUrl(url) {
+            this.payUrl = url;
+            this.setInlocalStorage();
         }
     }
 });

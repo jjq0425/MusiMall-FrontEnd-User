@@ -68,16 +68,22 @@
     <div class="payment-info card">
       <h2>支付信息</h2>
       <a-divider />
-      <a-descriptions column="3">
-        <a-descriptions-item label="支付状态">{{
-          payStatusText
-        }}</a-descriptions-item>
+      <a-descriptions column="2">
         <a-descriptions-item label="总金额"
           >￥{{ order.totalAmount.toFixed(2) }}</a-descriptions-item
         >
         <a-descriptions-item label="应付金额"
           >￥{{ order.paymentAmount.toFixed(2) }}</a-descriptions-item
         >
+        <a-descriptions-item label="支付状态">{{
+          payStatusText
+        }}</a-descriptions-item>
+        <a-descriptions-item label="支付方式" v-if="order.payType">
+          {{ payTypeText }} &nbsp;&nbsp;&nbsp;
+          <span v-if="order.alipayTraceNo">
+            (流水号：{{ order.alipayTraceNo }})
+          </span>
+        </a-descriptions-item>
       </a-descriptions>
     </div>
     <div class="remark-info card">
@@ -109,12 +115,18 @@
         </a-button>
         <div
           style="margin: 5px 0; color: gray"
-          v-if="order.orderStatus === 5 || order.orderStatus === 6"
+          v-if="
+            order.orderStatus === 5 ||
+            order.orderStatus === 6 ||
+            order.orderStatus === 2
+          "
         >
           感谢光临MusiMall，祝您购物愉快。
         </div>
       </div>
     </div>
+    <!-- 使用新的支付选择模态框组件 -->
+    <PayModal ref="payModalRef" @paymentComplete="fetchOrderDetails" />
   </div>
 </template>
 
@@ -130,6 +142,7 @@ import OrderHeader from "./OrderHeader.vue";
 import TradeList from "./TradeList.vue";
 import router from "@/router";
 import { useUserStore } from "@/store/user";
+import PayModal from "../../pay/PayModal.vue";
 
 const route = useRoute();
 const orderId = route.params.id;
@@ -143,6 +156,7 @@ const order = reactive({
   totalAmount: 0,
   paymentAmount: 0,
   remark: "",
+  payType: null,
   tradeItemList: [
     {
       productName: "",
@@ -207,6 +221,17 @@ const orderStatusText = computed(() => {
   }
 });
 
+const payTypeText = computed(() => {
+  switch (order.payType) {
+    case 1:
+      return "支付宝";
+    case 2:
+      return "金币";
+    default:
+      return "/";
+  }
+});
+
 const payStatusText = computed(() => {
   switch (order.payStatus) {
     case 1:
@@ -249,6 +274,11 @@ const cancelOrderNow = async () => {
     });
   } finally {
   }
+};
+
+const payModalRef = ref(null);
+const goToPay = () => {
+  payModalRef.value.open(order.id, order.totalAmount);
 };
 
 onMounted(() => {
@@ -310,5 +340,11 @@ a-divider {
 .button-container {
   display: flex;
   gap: 10px;
+}
+
+.pay-options {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
 }
 </style>
