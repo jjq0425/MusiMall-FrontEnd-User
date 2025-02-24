@@ -75,14 +75,25 @@
         <a-descriptions-item label="应付金额"
           >￥{{ order.paymentAmount.toFixed(2) }}</a-descriptions-item
         >
-        <a-descriptions-item label="支付状态">{{
-          payStatusText
-        }}</a-descriptions-item>
+        <a-descriptions-item label="支付状态"
+          >{{ payStatusText }}
+        </a-descriptions-item>
         <a-descriptions-item label="支付方式" v-if="order.payType">
           {{ payTypeText }} &nbsp;&nbsp;&nbsp;
           <span v-if="order.alipayTraceNo">
             (流水号：{{ order.alipayTraceNo }})
           </span>
+        </a-descriptions-item>
+        <a-descriptions-item label="校验支付状态" v-else>
+          <a-tooltip content="点击校验支付状态">
+            <a-button
+              type="primary"
+              @click="checkOrderPayFinishNow()"
+              size="small"
+              shape="round"
+              >点击校验</a-button
+            >
+          </a-tooltip>
         </a-descriptions-item>
       </a-descriptions>
     </div>
@@ -127,6 +138,8 @@
     </div>
     <!-- 使用新的支付选择模态框组件 -->
     <PayModal ref="payModalRef" @paymentComplete="fetchOrderDetails" />
+    <PaymentSuccessModal ref="paymentSuccessModalRef" />
+    <payment-failed-modal ref="paymentFailedModalRef" />
   </div>
 </template>
 
@@ -143,6 +156,9 @@ import TradeList from "./TradeList.vue";
 import router from "@/router";
 import { useUserStore } from "@/store/user";
 import PayModal from "../../pay/PayModal.vue";
+import { checkOrderPayFinish } from "../../../api/trade";
+import PaymentSuccessModal from "../../pay/PaymentSuccessModal.vue";
+import PaymentFailedModal from "../../pay/PaymentFailedModal.vue";
 
 const route = useRoute();
 const orderId = route.params.id;
@@ -279,6 +295,23 @@ const cancelOrderNow = async () => {
 const payModalRef = ref(null);
 const goToPay = () => {
   payModalRef.value.open(order.id, order.totalAmount);
+};
+
+const paymentSuccessModalRef = ref(null);
+const paymentFailedModalRef = ref(null);
+const checkOrderPayFinishNow = async () => {
+  Message.loading({ content: "校验支付状态中...", id: "check-pay-status" });
+  setTimeout(async () => {
+    const res = await checkOrderPayFinish(order.id);
+    if (res) {
+      Message.success({ content: "支付状态：已支付", id: "check-pay-status" });
+      paymentSuccessModalRef.value.open();
+      fetchOrderDetails();
+    } else {
+      Message.warning({ content: "支付状态：未支付", id: "check-pay-status" });
+      paymentFailedModalRef.value.open();
+    }
+  }, 1000);
 };
 
 onMounted(() => {

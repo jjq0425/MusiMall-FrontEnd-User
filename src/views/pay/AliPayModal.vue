@@ -10,7 +10,7 @@
     <div class="modal-content">
       <p class="important-text">浏览器将在新的页面打开支付宝，请完成支付。</p>
       <p>请不要关闭此窗口和刷新页面，支付后点击下面的按钮校验支付状态</p>
-      <p>若支付成功但系统校验失败，请联系客服处理。</p>
+      <p>若支付成功但系统校验失败，请联系客服处理。切勿重复支付。</p>
       <div class="button-container">
         <a-button type="primary" @click="handlePaymentComplete"
           >我已完成支付</a-button
@@ -47,7 +47,7 @@ const open = (orderId_) => {
   orderId.value = orderId_;
 };
 
-import { getOrderDetailById } from "../../api/trade";
+import { checkOrderPayFinish } from "../../api/trade";
 const handlePaymentComplete = async () => {
   // 获取订单详情
   const msg = Message.loading({
@@ -57,9 +57,8 @@ const handlePaymentComplete = async () => {
   });
   // 等待1s
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const res = await getOrderDetailById(orderId.value);
-  const data = res?.data[0];
-  if (data?.payStatus === 2) {
+  const res = await checkOrderPayFinish(orderId.value);
+  if (res == true) {
     handlePaymentSuccess();
     emit("paymentComplete");
   } else {

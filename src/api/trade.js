@@ -85,5 +85,14 @@ export const cancelOrder = (id) => {
     })
 }
 
+export const checkOrderPayFinish = (id) => {
 
+    return request({
+        url: `${baseUrl}/checkOrderPayFinish`,
+        method: 'get',
+        params: {
+            id: id
+        }
+    })
+}
 
