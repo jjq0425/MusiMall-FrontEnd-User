@@ -1,4 +1,5 @@
 import request from './request'
+import jsonBig from 'json-bigint'
 
 const baseUrl = '/api/order/v1/trade'
 
@@ -47,8 +48,8 @@ export const preCreateTradeId = () => {
     })
 }
 
-export const createOrderDirectOrCart = (type,id, deliveryAddressId, cartProducts, remark) => {
-    if(type=="direct"){
+export const createOrderDirectOrCart = (type, id, deliveryAddressId, cartProducts, remark) => {
+    if (type == "direct") {
         return request({
             url: `${baseUrl}/createByDirect`,
             method: 'post',
@@ -59,7 +60,7 @@ export const createOrderDirectOrCart = (type,id, deliveryAddressId, cartProducts
                 remark: remark
             }
         })
-    }else if(type=="cartAll"){
+    } else if (type == "cartAll") {
         return request({
             url: `${baseUrl}/create`,
             method: 'post',
@@ -70,5 +71,17 @@ export const createOrderDirectOrCart = (type,id, deliveryAddressId, cartProducts
             }
         })
     }
+}
+
+
+export const cancelOrder = (id) => {
+
+    return request({
+        url: `${baseUrl}/cancelOrder`,
+        method: 'post',
+        params: {
+            id: id
+        }
+    })
 }
 

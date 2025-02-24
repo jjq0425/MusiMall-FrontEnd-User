@@ -85,13 +85,43 @@
       <a-divider />
       <p>{{ order.remark || "无" }}</p>
     </div>
+    <!-- 新增浮动区域 -->
+    <div class="floating-buttons animate__animated animate__fadeInUp">
+      <div class="button-container">
+        <a-popconfirm
+          content="确定取消订单吗？"
+          @ok="cancelOrderNow"
+          status="warning"
+        >
+          <a-button
+            type="primary"
+            status="danger"
+            v-if="order.orderStatus === 1"
+            >取消订单</a-button
+          >
+        </a-popconfirm>
+        <a-button
+          type="primary"
+          @click="goToPay"
+          v-if="order.orderStatus === 1"
+        >
+          去支付
+        </a-button>
+        <div
+          style="margin: 5px 0; color: gray"
+          v-if="order.orderStatus === 5 || order.orderStatus === 6"
+        >
+          感谢光临MusiMall，祝您购物愉快。
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { getOrderDetailById } from "@/api/trade";
+import { getOrderDetailById, cancelOrder } from "@/api/trade";
 import { getAddressById } from "@/api/address";
 import { Message } from "@arco-design/web-vue";
 import dayjs from "dayjs";
@@ -205,6 +235,30 @@ const refreshOrderDetails = () => {
   }, 3500);
 };
 
+// Btn
+
+const cancelOrderNow = async () => {
+  Message.loading({ content: "取消订单中...", id: "cancel-order" });
+  try {
+    const res = await cancelOrder(order.id);
+    if (res.code != 200) {
+      Message.warning({
+        content: "取消订单失败: " + res.message,
+        id: "cancel-order",
+      });
+    } else {
+      Message.success({ content: "取消订单成功", id: "cancel-order" });
+    }
+    fetchOrderDetails();
+  } catch (error) {
+    Message.error({
+      content: "取消订单失败: " + error?.message,
+      id: "cancel-order",
+    });
+  } finally {
+  }
+};
+
 onMounted(() => {
   fetchOrderDetails();
 });
@@ -241,5 +295,28 @@ a-divider {
 
 .card {
   margin-top: 40px;
+}
+
+.floating-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  padding-right: 80px;
+  padding-left: 80px;
+  display: flex;
+
+  justify-content: flex-end;
+  box-shadow: 1px 3px 32px 0 rgba(50, 73, 198, 0.08),
+    6px -1px 28px 0 rgba(50, 73, 198, 0.12);
+  box-sizing: border-box;
+  border: 1px solid #e7e7e7;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
 }
 </style>
