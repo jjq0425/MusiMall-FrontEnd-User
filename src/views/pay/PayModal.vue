@@ -5,14 +5,14 @@
         <img src="@/assets/logo/alipay.png" alt="支付宝支付" class="pay-icon" />
         <span>支付宝支付</span>
       </div>
-      <div
+      <!-- <div
         class="pay-button coins"
         :class="{ disabled: isCoinsDisabled }"
         @click="payWithCoins"
       >
         <img src="@/assets/coin/coin.png" alt="金币支付" class="pay-icon" />
         <span>金币支付</span>
-      </div>
+      </div> -->
     </div>
   </a-modal>
   <AliPayModal ref="aliPayModalRef" @paymentComplete="paymentComplete" />
