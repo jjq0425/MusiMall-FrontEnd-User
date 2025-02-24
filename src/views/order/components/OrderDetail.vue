@@ -91,7 +91,7 @@
         <a-popconfirm
           content="确定取消订单吗？"
           @ok="cancelOrderNow"
-          status="warning"
+          type="warning"
         >
           <a-button
             type="primary"
@@ -240,15 +240,7 @@ const refreshOrderDetails = () => {
 const cancelOrderNow = async () => {
   Message.loading({ content: "取消订单中...", id: "cancel-order" });
   try {
-    const res = await cancelOrder(order.id);
-    if (res.code != 200) {
-      Message.warning({
-        content: "取消订单失败: " + res.message,
-        id: "cancel-order",
-      });
-    } else {
-      Message.success({ content: "取消订单成功", id: "cancel-order" });
-    }
+    await cancelOrder(order.id);
     fetchOrderDetails();
   } catch (error) {
     Message.error({
