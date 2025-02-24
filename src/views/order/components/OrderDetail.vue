@@ -85,7 +85,7 @@
           </span>
         </a-descriptions-item>
         <a-descriptions-item label="校验支付状态" v-else>
-          <a-tooltip content="点击校验支付状态">
+          <a-tooltip content="点击后系统立即校验支付状态。无需等待信息同步">
             <a-button
               type="primary"
               @click="checkOrderPayFinishNow()"
