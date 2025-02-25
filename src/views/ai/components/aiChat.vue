@@ -427,7 +427,9 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { aichat } from "@/api/ai";
 import { Message } from "@arco-design/web-vue";
 import { useApiStore } from "../../../store/api";
+import { useUserStore } from "../../../store/user";
 const apiStore = useApiStore();
+const userStore = useUserStore();
 
 /**
  * 发送消息
@@ -439,6 +441,11 @@ const sendMsgNow = () => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: "Basic@" + userStore.token,
+      Connection: "keep-alive",
+      Accept: "*/*",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Content-Length": 0,
     },
     body: JSON.stringify({
       userMessage: willsendMsg.value,

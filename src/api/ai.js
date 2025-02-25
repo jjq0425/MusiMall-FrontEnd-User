@@ -7,6 +7,7 @@ const baseUrl = '/api/ai'
 export const aichat = (isTest = true) => {
 
     return JSON.parse(localStorage.getItem('api')).baseUrlWithGateWay + `${baseUrl}/chat` + (isTest ? '/test' : '')
+    // return "http://localhost:9555" + `/chat` + (isTest ? '/test' : '')
 
 
 }
